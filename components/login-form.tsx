@@ -24,13 +24,13 @@ export function LoginForm({
         </div>
         <Field>
           <FieldLabel htmlFor="email" className="text-[#556378]">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input id="email" type="email" placeholder="m@example.com" className="border border-[#556378]" required />
         </Field>
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password" className="text-[#556378]">Password</FieldLabel>
           </div>
-          <Input id="password" type="password" required />
+          <Input id="password" type="password" className="border border-[#556378]" required />
         </Field>
         <Field>
           <Button type="submit" className="w-full bg-[#556378] cursor-pointer" disabled={isLoading}> 
