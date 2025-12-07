@@ -45,7 +45,7 @@ const data = {
     },
     {
       title: "Calendar",
-      url: "/authentication/dashboard/calendar",
+      url: "/authentication/calendar",
       icon: CalendarFold,
     },
     {
