@@ -11,15 +11,16 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card"
-import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import {
+  Card,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card"
 
 export default function Page() {
   return (
@@ -48,12 +49,26 @@ export default function Page() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
           <div className="grid auto-rows-min gap-4 grid-cols-1 md:grid-cols-3 p-3">
             {EventSpaces.map((space, index) => (
-               <Card 
+            <Card 
                 key={space.id || index} 
                 className="flex flex-col w-full bg-[#556378] rounded-xl overflow-hidden border-none"
               >
-              </Card>
+            <div className="relative w-55 h-55 shrink-0 overflow-hidden self-center">
+              <Image
+                src={space.imageSrc} 
+                alt={space.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+              <CardContent className="flex flex-1 items-center justify-center p-1 ">
+                  {space.title}
+                </CardContent>
+                <CardFooter className="flex flex-1 items-center justify-center ">
+                 {space.contactnum}
+                </CardFooter>
 
+            </Card>
             ))}
           </div>
         </div>
