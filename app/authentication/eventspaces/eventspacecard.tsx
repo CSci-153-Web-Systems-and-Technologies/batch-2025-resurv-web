@@ -10,7 +10,7 @@ interface EventspaceCardProps{
 
 export function EventspaceCard({ title, imageSrc, id }: EventspaceCardProps) {
   return (
-    <Link href={`/eventspaces/${id}`} className="aspect-square rounded-xl w-full h-full block">
+    <Link href={`/authentication/eventspaces/${id}`} className="aspect-square rounded-xl w-full h-full block">
       <Card className="bg-[#556378] flex-col w-full h-full items-center justify-center flex rounded-xl px-4 pb-4 pt-0 hover:bg-[#4a5568] relative overflow-hidden transition-colors">
         <CardHeader className="w-full h-55 absolute top-0 p-0! rounded-t-xl overflow-hidden z-0">
           <Image
