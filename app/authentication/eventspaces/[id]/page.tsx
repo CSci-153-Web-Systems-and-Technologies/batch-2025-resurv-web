@@ -61,7 +61,7 @@ export default async function EventSpacePage({ params }: PageProps) {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator/>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/authentication/dashboard" className= "text-black">
+                  <BreadcrumbLink href={`/authentication/eventspaces/${id}`} className= "text-black">
                     {eventSpace.title}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
