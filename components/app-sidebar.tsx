@@ -40,17 +40,17 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/authentication/dashboard",
       icon: LayoutDashboard
     },
     {
       title: "Calendar",
-      url: "#",
+      url: "/authentication/dashboard/calendar",
       icon: CalendarFold,
     },
     {
       title: "Contacts",
-      url: "#",
+      url: "/authentication/dashboard/contacts",
       icon: BookOpen,
 
     },
