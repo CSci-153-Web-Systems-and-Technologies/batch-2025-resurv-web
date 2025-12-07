@@ -5,7 +5,7 @@ import { EventSpaces } from "@/app/authentication/eventspaces/eventspace";
 import { Button } from "@/components/ui/button";
 import Image from "next/image"
 import { Calendar } from "@/components/ui/calendar" 
-import { getEvents } from "./eventsdata"
+import { sampleEvents } from "./eventsdata"
 
 import {
   Breadcrumb,
@@ -39,7 +39,7 @@ interface PageProps {
 }
 
 export default async function CalendarPage({ params }: PageProps) {
-    const events = await getEvents();
+    const events = sampleEvents;
   return (
     <SidebarProvider>
       <AppSidebar />
