@@ -50,7 +50,7 @@ const data = {
     },
     {
       title: "Contacts",
-      url: "/authentication/dashboard/contacts",
+      url: "/authentication/contacts",
       icon: BookOpen,
 
     },

@@ -85,7 +85,7 @@ export function EventCalendarCard({ events }: EventCalendarCardProps) {
         className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full [&_td]:pointer-events-none"
       />
 
-      <CardFooter className="flex flex-col items-start gap-3 border-t px-4 !pt-4">
+      <CardFooter className="flex flex-col items-start gap-3 border-t px-4">
         <div className="flex w-full items-center justify-between px-1">
           <div className="text-sm text-[#556378] font-medium ">
             {currentMonth.toLocaleDateString("en-US", {
