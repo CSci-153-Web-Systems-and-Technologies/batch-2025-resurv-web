@@ -7,7 +7,7 @@ export default function SignupPage() {
     <div className="grid min-h-svh lg:grid-cols-2 bg-[#CEDBEE]">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start text-[#556378] ">
-          <a href="#" className=" font-extrabold tracking-tight flex items-center gap-2">
+          <a href="/authentication/login" className=" font-extrabold tracking-tight flex items-center gap-2">
             <div className=" text-[#CEDBEE] flex size-6 items-center justify-center rounded-md bg-[#556378] ">
               <CalendarFold className="size-4" />
             </div>
