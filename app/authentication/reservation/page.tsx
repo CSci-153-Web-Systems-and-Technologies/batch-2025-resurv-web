@@ -64,7 +64,44 @@ export default function Page() {
                     className="rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-auto md:w-full md:h-full"
                     />
                   </Card>
-                  
+                  <Card className= " flex flex-col w-[300px] h-auto justify-center items-center bg-[#556378] pt-3 pb-3 rounded-lg text-[#556378]">
+                    <div className="flex flex-col justify-start w-[285px] mt-4 gap-2 px-4"> 
+                      <Label htmlFor="time-picker" className="px-1 text-white">
+                        Start Time
+                      </Label>
+                      <Input
+                        type="time"
+                        id="time-picker"
+                        defaultValue="00:00"
+                        className="px-1 text-[#EEF4ED] [&::-webkit-calendar-picker-indicator]:hidden"
+                      />
+                      
+                      <Label htmlFor="time-picker" className="px-1 text-[#EEF4ED]">
+                        End Time
+                      </Label>
+                      <Input 
+                        type="time" 
+                        id="time-picker"
+                        defaultValue="00:00" 
+                        className= " px-1 text-[#EEF4ED] [&::-webkit-calendar-picker-indicator]:hidden"
+                      /> 
+
+                      <Label htmlFor="purpose" className= "text-[#EEF4ED]">
+                        Purpose of Event 
+                      </Label>
+                      <Textarea id="purpose" className="w-full max-w-[300px] max-h-[80px] text-[#EEF4ED]" />
+
+                      <Label htmlFor="numofatt" className= "text-[#EEF4ED]">Number of Attendees </Label>
+                      <Input 
+                        type="number" 
+                        id="numofatt"
+                        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-[#EEF4ED]"
+                      />
+
+                      <Label htmlFor="specreq" className= "text-[#EEF4ED]">Special Requirements/Accomodities </Label>
+                      <Textarea id="specreq" className="w-full max-w-[300px] max-h-[80px] text-[#EEF4ED]" />
+                    </div>
+                  </Card>
                 </div>
 
                 <div className="p-6 flex flex-col gap-4">
