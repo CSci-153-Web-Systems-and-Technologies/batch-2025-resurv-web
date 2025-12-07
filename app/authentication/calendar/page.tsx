@@ -20,6 +20,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function Page() {
     const [date, setDate] = React.useState <Date | undefined>(
@@ -54,6 +63,21 @@ export default function Page() {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
           <div className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm overflow-hidden items-stretch justify-center ">
+            
+            <Select>
+            <SelectTrigger className="w-[190px] bg-[#EEF4ED] border border-[#556378]">
+              <SelectValue placeholder="Select an Event Space" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#EEF4ED]" >
+                <SelectGroup>
+                  <SelectItem value="bc"> Beach Garden  </SelectItem>
+                  <SelectItem value="cc"> Convention Center  </SelectItem>
+                  <SelectItem value="cce"> Center for Continuing Education  </SelectItem>
+
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
             <Calendar
                 mode="single"
                 selected={date}
