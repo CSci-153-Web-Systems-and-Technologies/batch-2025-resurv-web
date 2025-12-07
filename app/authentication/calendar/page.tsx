@@ -22,8 +22,12 @@ import {
 
 
 export default function Page() {
-      const [date, setDate] = React.useState <Date | undefined>(
-    new Date(2025, 5,12)
+    const [date, setDate] = React.useState <Date | undefined>(
+    new Date()
+    )
+    const bookedDates = Array.from(
+    { length: 5 },
+    (_, i) => new Date(2025, 11, 1 + i)//sample data
   )
   return (
     <SidebarProvider>
@@ -54,6 +58,17 @@ export default function Page() {
                 mode="single"
                 selected={date}
                 onSelect={setDate}
+                modifiers={{
+                booked: bookedDates, 
+                }}
+                modifiersClassNames={{
+                booked: 
+                "bg-red-100 text-red-400 " + 
+                "line-through decoration-red-400 " +
+                "cursor-not-allowed " +
+                "opacity-100 " +
+                "[&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 [&>button]:cursor-not-allowed",
+                }}
                 className="rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full "
             />
             </div>
