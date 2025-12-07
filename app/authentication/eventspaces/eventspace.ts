@@ -1,5 +1,5 @@
 
-export interface EventSpaces {
+export interface EventSpace {
   id: string;
   title: string;
   imageSrc: string;
@@ -7,7 +7,7 @@ export interface EventSpaces {
 }
 
 
-export const EventSpaces: EventSpaces[] = [
+export const EventSpaces: EventSpace[] = [
   {
     id: "cc",
     title: "Convention Center",
