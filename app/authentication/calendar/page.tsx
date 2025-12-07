@@ -1,4 +1,3 @@
-"use client"
 import * as React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { EventspaceCard } from "../eventspaces/eventspacecard";

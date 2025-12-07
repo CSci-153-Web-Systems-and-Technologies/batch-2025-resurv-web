@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { EventSpaces } from '../eventspaces/eventspace';
 import { PlusIcon } from "lucide-react"
 import { formatDateRange } from "little-date"
+
 import {
   Card,
   CardFooter,
@@ -35,14 +36,13 @@ export function EventCalendarCard({ events }: EventCalendarCardProps) {
   const [date, setDate] = React.useState<Date | undefined>(
     new Date(2025, 5, 12)
   )
-
   const bookedDates = Array.from(
     { length: 5 },
     (_, i) => new Date(2025, 11, 1 + i)
   )
 
   return (
-    <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm overflow-hidden items-stretch justify-center">
+    <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm items-stretch justify-center">
       <Select>
         <SelectTrigger className="w-[190px] bg-[#EEF4ED] border border-[#556378]">
           <SelectValue placeholder="Select an Event Space" />
@@ -66,9 +66,9 @@ export function EventCalendarCard({ events }: EventCalendarCardProps) {
         modifiers={{ booked: bookedDates }}
         modifiersClassNames={{
           booked:
-            "bg-red-100 text-red-400 line-through decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 [&>button]:cursor-not-allowed",
+            "bg-red-100 text-red-400 line-through decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 ",
         }}
-        className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full"
+        className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full [&_td]:pointer-events-none"
       />
 
       <CardFooter className="flex flex-col items-start gap-3 border-t px-4 !pt-4">
