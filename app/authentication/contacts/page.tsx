@@ -53,7 +53,7 @@ export default function Page() {
                 key={space.id || index} 
                 className="flex flex-col w-full bg-[#556378] rounded-xl overflow-hidden border-none"
               >
-            <div className="relative w-55 h-55 shrink-0 overflow-hidden self-center">
+            <div className="relative w-55 h-55 shrink-0 rounded-full overflow-hidden self-center">
               <Image
                 src={space.imageSrc} 
                 alt={space.title}
@@ -61,14 +61,14 @@ export default function Page() {
                 className="object-cover"
               />
             </div>
-              <CardContent className="flex flex-1 items-center justify-center p-1 ">
+              <CardContent className="flex flex-1 items-center justify-center p-1 text-white font-bold text-2xl text-center">
                   {space.title}
                 </CardContent>
-                <CardFooter className="flex flex-1 items-center justify-center ">
+                <CardFooter className="flex flex-1 items-center justify-center text-white font-regular text-xl text-center underline">
                  {space.contactnum}
                 </CardFooter>
 
-            </Card>
+            </Card> 
             ))}
           </div>
         </div>
