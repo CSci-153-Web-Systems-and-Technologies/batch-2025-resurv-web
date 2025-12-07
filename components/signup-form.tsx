@@ -49,7 +49,7 @@ export function SignupForm({
         </Field>
         <Field>
           <FieldDescription className="px-6 text-center text-[#556378]">
-            Already have an account? <a href="#">Sign in</a>
+            Already have an account? <a href="/authentication/login">Sign in</a>
           </FieldDescription>
         </Field>
       </FieldGroup>
