@@ -1,6 +1,4 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import { EventspaceCard } from "../eventspaces/eventspacecard";
-import { EventSpaces } from "@/app/authentication/eventspaces/eventspace";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,8 +13,21 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { supabase } from "@/lib/supabase";
+import { EventspaceCard } from "../eventspaces/eventspacecard";
 
-export default function Page() {
+export default async function Page() {
+  
+
+  const { data: facilities, error } = await supabase
+    .from('facilities')
+    .select('*')
+    .order('created_at', { ascending: true }); 
+
+  if (error) {
+    console.error("Error loading facilities:", error);
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -42,14 +53,18 @@ export default function Page() {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
           <div className="grid auto-rows-min gap-4 grid-cols-1 md:grid-cols-3 p-3">
-            {EventSpaces.map((space, index) => (
+            {facilities?.map((space) => (
               <EventspaceCard
-                key={index}
-                id={space.id}
+                key={space.id}
+                id={space.id}           
                 title={space.title}
-                imageSrc={space.imageSrc}
+                imageSrc={space.image_url || '/placeholder.jpg'} 
               />
             ))}
+            {(!facilities || facilities.length === 0) && (
+                <p>No event spaces found.</p>
+            )}
+
           </div>
         </div>
       </SidebarInset>
