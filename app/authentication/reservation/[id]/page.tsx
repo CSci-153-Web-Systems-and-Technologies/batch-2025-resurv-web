@@ -1,5 +1,8 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import ReservationForm from "./reservationcard"
+import { supabase } from "@/lib/supabase";
+import { ReservationCard } from "./reservationcard"
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,11 +17,23 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-// 1. Keep this ASYNC so you can use 'await params'
 export default async function ReservationPage({ params }: { params: Promise<{ id: string }> }) {
-  
-  // 2. Await the params to get the ID
   const { id } = await params; 
+  
+  const user = await currentUser();
+  if (!user) return redirect("/authentication/login");
+
+  const { data: facility, error } = await supabase
+    .from('facilities')
+    .select('id, title')
+    .eq('id', id)
+    .single();
+
+  if (error || !facility) {
+    return <div>Error: Facility not found</div>;
+  }
+
+  // NOTE: We REMOVED the booking fetch here. The card handles it now.
 
   return (
     <SidebarProvider>
@@ -31,17 +46,23 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#" className="text-black">Dashboard</BreadcrumbLink>
+                  <BreadcrumbLink href="/authentication/dashboard" className="text-black">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem className="hidden md:block">
+                  <span className="text-black">{facility.title}</span>
+                </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
-            {/* 3. Pass the ID to the Client Component */}
-            <ReservationForm facilityId={id} />
+            <ReservationCard 
+                facility={facility} 
+                userId={user.id} 
+                // REMOVED: bookedDates prop
+            />
         </div>
 
       </SidebarInset>
