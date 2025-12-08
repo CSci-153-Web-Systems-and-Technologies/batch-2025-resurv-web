@@ -22,7 +22,7 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
   
   const user = await currentUser();
   if (!user) return redirect("/authentication/login");
-
+  
   const { data: facility, error } = await supabase
     .from('facilities')
     .select('id, title')
@@ -50,7 +50,11 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="hidden md:block">
-                  <span className="text-black">{facility.title}</span>
+                  <BreadcrumbLink  href={`/authentication/eventspaces/${id}`} className="text-black">{facility.title}</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href={`/authentication/reservation/${facility.id}`} className="text-black">Reservation</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
