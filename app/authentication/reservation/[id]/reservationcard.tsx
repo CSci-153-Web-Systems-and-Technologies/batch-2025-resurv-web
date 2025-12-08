@@ -36,8 +36,8 @@ export function ReservationCard({ facility, userId }: ReservationFormProps) {
   const [bookedDates, setBookedDates] = React.useState<{ from: Date; to: Date }[]>([]);
 
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
+    from: undefined,
+    to: undefined,
   })
 
   // 2. FETCH: Get data from Database when component loads
@@ -98,14 +98,22 @@ export function ReservationCard({ facility, userId }: ReservationFormProps) {
       return;
     }
 
-    const startDate = dateRange.from;
-    const endDate = dateRange.to || dateRange.from;
+    const newStart = dateRange.from;
+    const newEnd = dateRange.to || dateRange.from;
     
-    if (isDateRangeOverlapping(startDate, endDate, normalizedBookedDates)) {
-        alert("The selected date range conflicts with an existing reservation.");
+    const hasConflict = normalizedBookedDates.some((booking) => {
+        const existingStart = booking.from;
+        const existingEnd = booking.to;
+        return newStart < existingEnd && newEnd > existingStart;
+    });
+
+    if (hasConflict) {
+        alert("The selected dates conflict with an existing reservation.");
+        setDateRange(undefined); 
         setIsSubmitting(false);
-        return;
+        return; 
     }
+
 
     const formData = new FormData(form);
     const startTimeStr = formData.get("start_time") as string;
@@ -114,8 +122,8 @@ export function ReservationCard({ facility, userId }: ReservationFormProps) {
     const attendees = formData.get("attendees") as string;
     const requirements = formData.get("requirements") as string;
 
-    const StartTime = combineDateAndTime(startDate, startTimeStr);
-    const EndTime = combineDateAndTime(endDate, endTimeStr);
+    const StartTime = combineDateAndTime(newStart, startTimeStr);
+    const EndTime = combineDateAndTime(newEnd, endTimeStr);
 
     const { error } = await supabase
       .from('reservations')
@@ -136,9 +144,8 @@ export function ReservationCard({ facility, userId }: ReservationFormProps) {
     } else {
       alert("Reservation submitted successfully!");
       form.reset();
-      setDateRange({ from: new Date(), to: new Date() });
+      setDateRange({ from: undefined, to: undefined});
       router.refresh();
-      // Reload the page to force a re-fetch if needed, or trigger the fetch manually
       window.location.reload(); 
     }
     setIsSubmitting(false);
