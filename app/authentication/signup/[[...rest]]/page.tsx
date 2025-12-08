@@ -1,7 +1,8 @@
+"use client"
 import { GalleryVerticalEnd } from "lucide-react"
 import { CalendarFold } from 'lucide-react';
 import { SignupForm } from "@/components/signup-form"
-
+import { SignUp } from "@clerk/nextjs";
 export default function SignupPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2 bg-[#CEDBEE]">
@@ -16,7 +17,7 @@ export default function SignupPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs text-[#556378]">
-            <SignupForm />
+            <SignUp path="/authentication/signup"/>
           </div>
         </div>
       </div>
