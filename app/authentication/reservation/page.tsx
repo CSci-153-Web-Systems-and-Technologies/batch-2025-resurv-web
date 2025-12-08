@@ -80,12 +80,19 @@ export default function ReservationPage() {
                 <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 justify-center items-center">
                   <Card className="flex flex-col w-full md:flex-1 h-auto md:h-auto bg-[#556378] rounded-lg shadow-sm p-4 text-white justify-center items-center md:w-full">
                     <Calendar
-                     mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    className="rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-auto md:w-full md:h-full"
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      className="rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-auto md:w-full md:h-full"
+                      modifiers={{
+                        booked: bookedDates
+                      }}
+                      modifiersClassNames={{
+                        booked: "bg-red-200 text-red-900 font-bold decoration-red-500 underline"
+                      }}
                     />
+                    
                   </Card>
                   <Card className= " flex flex-col w-[300px] h-auto justify-center items-center bg-[#556378] pt-3 pb-3 rounded-lg text-[#556378]">
                     <div className="flex flex-col justify-start w-[285px] mt-4 gap-2 px-4"> 
