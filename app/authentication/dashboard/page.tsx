@@ -15,10 +15,11 @@ import {
 
 import { supabase } from "@/lib/supabase";
 import { EventspaceCard } from "../eventspaces/eventspacecard";
-
+import { syncUser } from "@/lib/syncUser";
 export default async function Page() {
   
-
+  await syncUser();
+  
   const { data: facilities, error } = await supabase
     .from('facilities')
     .select('*')
@@ -27,7 +28,7 @@ export default async function Page() {
   if (error) {
     console.error("Error loading facilities:", error);
   }
-
+  
   return (
     <SidebarProvider>
       <AppSidebar />
