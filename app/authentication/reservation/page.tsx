@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { DateRange } from "react-day-picker"
+import { supabase } from "@/lib/supabase";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,21 +19,33 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import {Card} from "@/components/ui/card"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+const [bookedDates, setBookedDates] = React.useState<Date[]>([]);
+React.useEffect(() => {
+    const fetchBookings = async () => {
+      const { data, error } = await supabase
+        .from('reservations')
+        .select('start_time')
+        // Optional: Filter by specific facility if you have the ID
+        // .eq('facility_id', 'some-uuid-here') 
+        .eq('status', 'approved'); // Only show confirmed bookings
 
+      if (error) {
+        console.error('Error fetching reservations:', error);
+      } else if (data) {
+        // Convert database strings (ISO) to Javascript Date objects
+        const dates = data.map((booking) => new Date(booking.start_time));
+        setBookedDates(dates);
+      }
+    };
+
+    fetchBookings();
+  }, []);
 
 export default function ReservationPage() {
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
