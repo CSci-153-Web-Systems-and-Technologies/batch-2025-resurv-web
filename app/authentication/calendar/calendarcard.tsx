@@ -64,7 +64,7 @@ export function EventCalendarCard({ events, facilities }: EventCalendarCardProps
   }, [events, selectedSpaceId]);
 
   return (
-    <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm items-stretch justify-center">
+    <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-[#556378] rounded-xl shadow-sm items-stretch justify-center">
       
       <Select onValueChange={setSelectedSpaceId}>
         <SelectTrigger className="w-[190px] bg-[#EEF4ED] border border-[#556378] cursor-pointer">
@@ -93,7 +93,10 @@ export function EventCalendarCard({ events, facilities }: EventCalendarCardProps
           booked:
             "bg-red-100 text-red-400 line-through decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 ",
         }}
-        className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full [&_td]:pointer-events-none"
+        classNames={{
+          caption_label: "text-3xl font-extrabold" // Change 'text-2xl' to whatever size you want
+        }}
+        className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full [&_td]:pointer-events-none border-[#556378] "
       />
 
       <CardFooter className="flex flex-col items-start gap-3 border-t px-4">
