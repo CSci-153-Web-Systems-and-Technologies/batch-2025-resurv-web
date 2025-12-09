@@ -93,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className= "flex-1 overflow-auto flex flex-col items-center px-2 w-full h-full text-4xl bg-[#556378] text-[#C1E1C1] ">
         <NavMain items={activeNavMain}  />
       </SidebarContent>
-      <SidebarFooter className= "mt-auto w-full px-2  bg-[#EEF4ED] hover:bg-white border-2 border-[#556378] rounded-sm">
+      <SidebarFooter className= "mt-auto w-full px-2 bg-[#556378] border-[#556378] rounded-sm">
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
