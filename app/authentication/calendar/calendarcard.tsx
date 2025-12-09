@@ -67,13 +67,13 @@ export function EventCalendarCard({ events, facilities }: EventCalendarCardProps
     <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm items-stretch justify-center">
       
       <Select onValueChange={setSelectedSpaceId}>
-        <SelectTrigger className="w-[190px] bg-[#EEF4ED] border border-[#556378]">
+        <SelectTrigger className="w-[190px] bg-[#EEF4ED] border border-[#556378] cursor-pointer">
           <SelectValue placeholder="Select an Event Space" />
         </SelectTrigger>
         <SelectContent className="bg-[#EEF4ED]">
           <SelectGroup>
             {facilities.map((space) => (
-                <SelectItem key={space.id} value={space.id}>
+                <SelectItem key={space.id} value={space.id} className="cursor-pointer">
                   {space.title}
                 </SelectItem>
             ))}
