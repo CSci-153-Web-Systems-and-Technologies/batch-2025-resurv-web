@@ -52,10 +52,19 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
 
-  const activeNavMain = data.navMain.map((item) => ({
-    ...item,
-    isActive: pathname === item.url, 
-  }))
+  const activeNavMain = data.navMain.map((item) => {
+    let isActive = pathname === item.url;
+    if (item.title === "Dashboard") {
+      if (pathname.includes("/eventspaces") || pathname.includes("/reservation")) {
+        isActive = true;
+      }
+    }
+
+    return {
+      ...item,
+      isActive: isActive, 
+    }
+  })
 
 
   return (
