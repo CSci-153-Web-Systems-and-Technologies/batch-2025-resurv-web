@@ -73,11 +73,11 @@ export default async function Page() {
               <CardContent className="flex flex-1 items-center justify-center p-1 text-white font-bold text-2xl text-center">
                   {facility.title}
                 </CardContent>
-                <CardFooter className="flex flex-1 items-center justify-center text-white font-regular text-xl text-center underline">
-                 Contact Number: {facility.contact_num}
+                <CardFooter className="flex flex-1 items-center justify-center text-white font-regular text-xl text-center">
+                 <span className="underline"> {facility.contact_num} </span>
                 </CardFooter>
-                 <CardFooter className="flex flex-1 items-center justify-center text-white font-regular text-xl text-center underline">
-                 {facility.local_num}
+                 <CardFooter className="flex flex-1 items-center justify-center text-white font-regular text-xl text-center">
+                 <span className="underline"> {facility.local_num} </span>
                 </CardFooter>
 
             </Card> 
