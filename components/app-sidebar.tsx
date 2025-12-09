@@ -82,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               }
             >
               <div className="w-6 h-6 flex items-center justify-center gap-1 text-[#C1E1C1] mr-4 text-5xl">
-                <CalendarFold size={500} className="text-[#C1E1C1] w-8! h-8!" />
+                <CalendarFold size={500} className=" flex text-[#C1E1C1] w-9! h-9! items-center justify-center mt-1.5" />
                  Resurv
               </div>
 
