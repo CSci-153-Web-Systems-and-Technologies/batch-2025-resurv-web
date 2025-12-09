@@ -4,6 +4,7 @@ import * as React from "react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import { Button } from "./ui/button"
+import { usePathname } from "next/navigation"
 import {
   AudioWaveform,
   Calendar,
@@ -59,6 +60,14 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
+
+  const activeNavMain = data.navMain.map((item) => ({
+    ...item,
+    isActive: pathname === item.url, 
+  }))
+
+
   return (
     <Sidebar collapsible="none" className="flex flex-col sticky top-0 h-screen items-center justify-center bg-[#556378] "{...props}>
       <SidebarHeader className="w-full px-2 py-4 h-32 flex items-center justify-center bg-[#556378] ">
@@ -83,7 +92,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Button>
       </SidebarHeader>
       <SidebarContent className= "flex-1 overflow-auto flex flex-col items-center px-2 w-full h-full text-4xl bg-[#556378] text-[#C1E1C1] ">
-        <NavMain items={data.navMain}  />
+        <NavMain items={activeNavMain}  />
       </SidebarContent>
       <SidebarFooter className= "mt-auto w-full px-2  bg-[#EEF4ED] hover:bg-white border-2 border-[#556378] rounded-sm">
         <NavUser user={data.user} />
