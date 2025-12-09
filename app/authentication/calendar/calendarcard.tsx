@@ -20,49 +20,60 @@ import {
 
 export interface CalendarEvent {
   title: string;
-  from: string | Date;
-  to: string | Date;
-  id: string; 
+  from: Date;
+  to:  Date;
+  facilityId: string;
+  facilityName: string;
 }
 
 interface EventCalendarCardProps {
   events: CalendarEvent[]; 
+  facilities: { id: string; title: string }[];
 }
 
-export function EventCalendarCard({ events }: EventCalendarCardProps) {
+export function EventCalendarCard({ events, facilities }: EventCalendarCardProps) {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date())
   
-  const [selectedSpace, setSelectedSpace] = React.useState<string>("");
+  const [selectedSpaceId, setSelectedSpaceId] = React.useState<string>("all");
 
-  const bookedDates = Array.from(
-    { length: 5 },
-    (_, i) => new Date(2025, 11, 1 + i)
-  )
+  const filteredEvents = React.useMemo(() => {
+    return events.filter((event) => {
+      const eventDate = new Date(event.from);
+      const isSameMonth = 
+        eventDate.getMonth() === currentMonth.getMonth() &&
+        eventDate.getFullYear() === currentMonth.getFullYear();
 
-  const filteredEvents = events.filter((event) => {
-    const eventDate = new Date(event.from);
-    
-    const isSameMonth = 
-      eventDate.getMonth() === currentMonth.getMonth() &&
-      eventDate.getFullYear() === currentMonth.getFullYear();
+      const isSameSpace = selectedSpaceId && selectedSpaceId !== "all" 
+        ? event.facilityId === selectedSpaceId 
+        : true;
 
-    const isSameSpace = selectedSpace ? event.id === selectedSpace : true;
+      return isSameMonth && isSameSpace;
+    });
+  }, [events, currentMonth, selectedSpaceId]);
+  
+  const bookedRanges = React.useMemo(() => {
+    const relevantEvents = selectedSpaceId && selectedSpaceId !== "all" 
+        ? events.filter(e => e.facilityId === selectedSpaceId)
+        : events;
 
-    return isSameMonth && isSameSpace;
-  });
+    return relevantEvents.map(event => ({
+        from: event.from,
+        to: event.to
+    }));
+  }, [events, selectedSpaceId]);
 
   return (
     <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 p-4 gap-6 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm items-stretch justify-center">
       
-      <Select value={selectedSpace} onValueChange={setSelectedSpace}>
+      <Select onValueChange={setSelectedSpaceId}>
         <SelectTrigger className="w-[190px] bg-[#EEF4ED] border border-[#556378]">
           <SelectValue placeholder="Select an Event Space" />
         </SelectTrigger>
         <SelectContent className="bg-[#EEF4ED]">
           <SelectGroup>
-            {EventSpaces.map((space) => (
-                <SelectItem key={space.id} value={space.title}>
+            {facilities.map((space) => (
+                <SelectItem key={space.id} value={space.id}>
                   {space.title}
                 </SelectItem>
             ))}
@@ -74,13 +85,13 @@ export function EventCalendarCard({ events }: EventCalendarCardProps) {
         mode="single"
         selected={date}
         onSelect={setDate}
-        disabled={bookedDates}
-        modifiers={{ booked: bookedDates }}
+        disabled={bookedRanges}
+        modifiers={{ booked: bookedRanges }}
         month={currentMonth} 
         onMonthChange={setCurrentMonth}
         modifiersClassNames={{
           booked:
-            "bg-red-100 text-red-400 line-through decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 ",
+            "bg-red-100 text-red-400 decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 ",
         }}
         className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full [&_td]:pointer-events-none"
       />
@@ -110,7 +121,7 @@ export function EventCalendarCard({ events }: EventCalendarCardProps) {
             ))
           ) : (
              <p className="text-xs italic text-gray-500 pl-2">
-               {selectedSpace ? `No events for ${selectedSpace} this month` : "No events this month"}
+               {selectedSpaceId ? `No events for ${selectedSpaceId} this month` : "No events this month"}
              </p>
           )}
         </div>
