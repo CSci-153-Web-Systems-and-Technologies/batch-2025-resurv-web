@@ -32,7 +32,7 @@ interface EventCalendarCardProps {
 }
 
 export function EventCalendarCard({ events, facilities }: EventCalendarCardProps) {
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [date, setDate] = React.useState<Date | undefined>(undefined)
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date())
   
   const [selectedSpaceId, setSelectedSpaceId] = React.useState<string>("all");
