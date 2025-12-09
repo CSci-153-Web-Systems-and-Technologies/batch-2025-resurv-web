@@ -40,7 +40,7 @@ export function NavMain({
             <SidebarMenuButton 
             asChild tooltip={item.title} 
             isActive={item.isActive} 
-            className="group/menu-button data-[active=true]:bg-[#C1E1C1] data-[active=true]:text-[#556378] "
+            className="group/menu-button data-[active=true]:bg-[#C1E1C1] data-[active=true]:text-[#556378] hover:bg-[#EEF4ED] hover:text-[#556378]"
             >
               <Link
                 href={item.url}
