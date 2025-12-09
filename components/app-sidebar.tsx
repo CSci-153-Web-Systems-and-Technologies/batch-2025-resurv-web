@@ -60,7 +60,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="none" className="flex flex-col min-h-screen items-center justify-center bg-[#556378] "{...props}>
+    <Sidebar collapsible="none" className="flex flex-col sticky top-0 h-screen items-center justify-center bg-[#556378] "{...props}>
       <SidebarHeader className="w-full px-2 py-4 h-32 flex items-center justify-center bg-[#556378] ">
         <Button className="w-full justify-center py-2 gap-1 bg-transparent hover:bg-transparent">
           <a
