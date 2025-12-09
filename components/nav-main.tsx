@@ -3,19 +3,10 @@ import Link from "next/link"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
 export function NavMain({
@@ -37,7 +28,11 @@ export function NavMain({
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title} className="flex w-full mb-2 items-center justify-center">
-            <SidebarMenuButton asChild tooltip={item.title}>
+            <SidebarMenuButton 
+            asChild tooltip={item.title} 
+            isActive={item.isActive} 
+            className="group/menu-button data-[active=true]:bg-[#C1E1C1] data-[active=true]:text-[#556378] hover:bg-[#EEF4ED] hover:text-[#556378]"
+            >
               <Link
                 href={item.url}
                 className="
@@ -45,12 +40,12 @@ export function NavMain({
                   rounded-md
                   transition-colors duration-150
                   border border-transparent
-                  hover:bg-[#EEF4ED] hover:text-[#556378]
+                  hover:bg-[#C1E1C1] hover:text-[#556378]
                 "
               >
                 {item.icon && (
                   <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                    <item.icon size={24} className="text-[#C1E1C1]" />
+                    <item.icon size={24} className="text-current"  />
                   </div>
                 )}
                 <span className="text-xl font-medium">{item.title}</span>
