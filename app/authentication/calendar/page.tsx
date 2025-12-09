@@ -1,11 +1,6 @@
 import * as React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { EventspaceCard } from "../eventspaces/eventspacecard";
-import { EventSpaces } from "@/app/authentication/eventspaces/eventspace";
-import { Button } from "@/components/ui/button";
-import Image from "next/image"
-import { Calendar } from "@/components/ui/calendar" 
-import { sampleEvents } from "./eventsdata"
+import { supabase } from "@/lib/supabase"
 
 import {
   Breadcrumb,
@@ -22,24 +17,40 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
-interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
 
-export default async function CalendarPage({ params }: PageProps) {
-    const events = sampleEvents;
+export default async function CalendarPage() {
+
+  const { data: facilities } = await supabase
+    .from('facilities')
+    .select('id, title')
+    .order('title');
+  
+  const { data: reservations } = await supabase
+    .from('reservations')
+    .select(`
+      id,
+      purpose,
+      start_time,
+      end_time,
+      facility_id,
+      facilities (title)
+    `)
+    .in('status', ['approved', 'pending']);
+  const cleanFacilities = facilities?.map((f) => ({
+    id: f.id,
+    title: f.title || "Untitled Space" 
+  })) || [];
+
+  const events = reservations?.map((res: any) => ({
+    id: res.id,
+    title: res.purpose || "Reserved", // Use purpose as the event title
+    from: new Date(res.start_time),
+    to: new Date(res.end_time),
+    facilityId: res.facility_id,
+    facilityName: res.facilities?.title || "Unknown Space"
+  })) || [];
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -64,8 +75,10 @@ export default async function CalendarPage({ params }: PageProps) {
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
-            <EventCalendarCard events={events} />
-            
+            <EventCalendarCard 
+                events={events} 
+                facilities={cleanFacilities || []} 
+            />
         </div>
       </SidebarInset>
     </SidebarProvider>
