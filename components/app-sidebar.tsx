@@ -6,19 +6,10 @@ import { NavUser } from "@/components/nav-user"
 import { Button } from "./ui/button"
 import { usePathname } from "next/navigation"
 import {
-  AudioWaveform,
-  Calendar,
   BookOpen,
   CalendarFold,
   LayoutDashboard,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+
 } from "lucide-react"
 
 
@@ -27,7 +18,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
 } from "@/components/ui/sidebar"
 
 
@@ -82,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 
               }
             >
-              <div className="w-6 h-6 flex items-center justify-center gap-1 text-[#C1E1C1]">
+              <div className="w-6 h-6 flex items-center justify-center gap-1 text-[#C1E1C1] mr-4 text-5xl">
                 <CalendarFold size={500} className="text-[#C1E1C1] w-8! h-8!" />
                  Resurv
               </div>
