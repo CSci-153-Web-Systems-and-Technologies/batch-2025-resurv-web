@@ -91,7 +91,7 @@ export function EventCalendarCard({ events, facilities }: EventCalendarCardProps
         onMonthChange={setCurrentMonth}
         modifiersClassNames={{
           booked:
-            "bg-red-100 text-red-400 decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 ",
+            "bg-red-100 text-red-400 line-through decoration-red-400 cursor-not-allowed opacity-100 [&>button]:hover:bg-red-100 [&>button]:hover:text-red-400 ",
         }}
         className=" rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-full h-full [&_td]:pointer-events-none"
       />
