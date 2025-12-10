@@ -8,7 +8,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     
   // 1. SECURITY CHECK: Check the Metadata we set earlier
   if (user?.publicMetadata?.role !== 'admin') {
-    return redirect("/authentication/dashboard"); // Kick them back to student dashboard
+    return redirect("/student/dashboard"); // Kick them back to student dashboard
   }
 
   return (
