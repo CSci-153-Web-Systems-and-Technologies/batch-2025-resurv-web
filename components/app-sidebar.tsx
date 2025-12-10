@@ -31,17 +31,17 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/authentication/dashboard",
+      url: "/student/dashboard",
       icon: LayoutDashboard
     },
     {
       title: "Calendar",
-      url: "/authentication/calendar",
+      url: "/student/calendar",
       icon: CalendarFold,
     },
     {
       title: "Contacts",
-      url: "/authentication/contacts",
+      url: "/student/contacts",
       icon: BookOpen,
 
     },
@@ -72,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="w-full px-2 py-4 h-32 flex items-center justify-center bg-[#556378] ">
         <Button className="w-full justify-center py-2 gap-1 bg-transparent hover:bg-transparent">
           <a
-            href="/authentication/dashboard"
+            href="/student/dashboard"
             className="flex items-center gap-2 justify-center w-full" 
           >
             <span

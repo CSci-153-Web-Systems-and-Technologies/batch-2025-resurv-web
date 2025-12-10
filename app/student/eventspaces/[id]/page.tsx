@@ -52,13 +52,13 @@ export default async function EventSpacePage({ params }: PageProps) {
             <Breadcrumb >
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/authentication/dashboard" className= "text-black">
+                  <BreadcrumbLink href="/student/dashboard" className= "text-black">
                     Dashboard
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator/>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href={`/authentication/eventspaces/${id}`} className= "text-black">
+                  <BreadcrumbLink href={`/student/eventspaces/${id}`} className= "text-black">
                     {eventSpace.title}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -82,7 +82,7 @@ export default async function EventSpacePage({ params }: PageProps) {
       </div>
 
       <Link 
-        href={`/authentication/reservation/${eventSpace.id}`}
+        href={`/student/reservation/${eventSpace.id}`}
         className="absolute bottom-4 right-4 bg-[#C5E0C7] hover:bg-[#b3dcb5] text-black px-6 py-2 font-bold border border-gray-400 shadow-md transition-colors rounded-lg"
       >
         RESERVE

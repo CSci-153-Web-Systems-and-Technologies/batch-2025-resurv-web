@@ -21,7 +21,7 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
   const { id } = await params; 
   
   const user = await currentUser();
-  if (!user) return redirect("/authentication/login");
+  if (!user) return redirect("/login");
   
   const { data: facility, error } = await supabase
     .from('facilities')
@@ -46,15 +46,15 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/authentication/dashboard" className="text-black">Dashboard</BreadcrumbLink>
+                  <BreadcrumbLink href="/student/dashboard" className="text-black">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink  href={`/authentication/eventspaces/${id}`} className="text-black">{facility.title}</BreadcrumbLink>
+                  <BreadcrumbLink  href={`/student/eventspaces/${id}`} className="text-black">{facility.title}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href={`/authentication/reservation/${facility.id}`} className="text-black">Reservation</BreadcrumbLink>
+                  <BreadcrumbLink href={`/student/reservation/${facility.id}`} className="text-black">Reservation</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

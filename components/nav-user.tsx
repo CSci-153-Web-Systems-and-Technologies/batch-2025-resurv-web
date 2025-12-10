@@ -59,7 +59,7 @@ export function NavUser() {
             sideOffset={4}
           >
             <DropdownMenuItem
-            onClick={() => signOut({ redirectUrl: '/authentication/login' })}
+            onClick={() => signOut({ redirectUrl: '/login' })}
             className=" focus:bg-[#C1E1C1] focus:text-[#556378] cursor-pointer text-[#C1E1C1] "
             > 
               <LogOut className="mr-2 h-4 w-4" />
