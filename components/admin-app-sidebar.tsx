@@ -31,25 +31,19 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/student/dashboard",
+      url: "/admin/dashboard",
       icon: LayoutDashboard
     },
     {
       title: "Calendar",
-      url: "/student/calendar",
+      url: "/admin/calendar",
       icon: CalendarFold,
-    },
-    {
-      title: "Contacts",
-      url: "/student/contacts",
-      icon: BookOpen,
-
     },
     
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
 
   const activeNavMain = data.navMain.map((item) => {
