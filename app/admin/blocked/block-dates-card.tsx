@@ -262,6 +262,15 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                             </SelectGroup>
                             </SelectContent>
                         
+                        <form className= "mt-5"> 
+                            <Label htmlFor="purpose" className="text-[#EEF4ED] m-1">Purpose of Blocking Date</Label>
+                            <Textarea name="purpose" required className="w-full max-w-[300px] text-[#EEF4ED]" />
+                            
+                            <Button type="submit" disabled={isSubmitting} className="mt-4 bg-[#EEF4ED] text-[#556378] hover:bg-slate-200 cursor-pointer m-1 mt-4">
+                            {isSubmitting ? "Booking..." : "Confirm"}
+                            </Button>
+                        </form>
+
                         </Select>
                     </div>
                 </Card>
