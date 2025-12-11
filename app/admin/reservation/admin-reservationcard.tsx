@@ -185,7 +185,25 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             </Card>
             
             {/* Right Column: Inputs */}
-            
+            <Card className="flex flex-col w-[300px] h-auto justify-center items-center bg-[#556378] pt-3 pb-3 rounded-lg text-[#556378]">
+            <div className="flex flex-col justify-start w-[285px] mt-4 gap-2 px-4">  
+            <Label className="px-1 text-white">Event Space</Label>
+                <Select value={selectedFacilityId} onValueChange={setSelectedFacilityId}>
+                    <SelectTrigger className="w-full bg-[#EEF4ED] border border-[#556378] cursor-pointer">
+                    <SelectValue placeholder="Select an Event Space" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#EEF4ED]">
+                    <SelectGroup>
+                        {facilities.map((space) => (
+                            <SelectItem key={space.id} value={space.id} className="cursor-pointer">
+                            {space.title}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+            </Card>
         </div>
     </form>
   )
