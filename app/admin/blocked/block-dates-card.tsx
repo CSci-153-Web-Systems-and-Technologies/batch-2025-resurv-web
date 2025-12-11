@@ -43,21 +43,24 @@ export function AdminBlockCard({ facilities, userId }: ReservationFormProps) {
   };
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [selectedFacilityId, setSelectedFacilityId] = React.useState<string>("");
+  const [selectedFacilityId, setSelectedFacilityId] = React.useState<string>("");       
   const [bookedDates, setBookedDates] = React.useState<{ from: Date; to: Date }[]>([]);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
 
   const fetchBookings = React.useCallback(async () => {
-    if (!selectedFacilityId) return;
     
     const supabaseClient = await getSupabase();
     if(!supabaseClient) return;
 
-    const { data } = await supabaseClient
+    let query = supabaseClient
         .from('reservations')
         .select('start_time, end_time')
-        .eq('facility_id', selectedFacilityId)
         .in('status', ['approved', 'pending']); 
+    if (selectedFacilityId) {
+        query = query.eq('facility_id', selectedFacilityId);
+    }
+
+    const { data } = await query;
 
     if (data) {
         const formatted = data.map(b => ({
@@ -93,6 +96,12 @@ export function AdminBlockCard({ facilities, userId }: ReservationFormProps) {
     event.preventDefault();
     setIsSubmitting(true);
     const form = event.currentTarget as HTMLFormElement;
+
+    if (!selectedFacilityId) {
+        alert("Please select an Event Space first.");
+        setIsSubmitting(false);
+        return;
+    }
 
     if (!dateRange?.from) { 
         alert("Please select a date on the calendar."); 
