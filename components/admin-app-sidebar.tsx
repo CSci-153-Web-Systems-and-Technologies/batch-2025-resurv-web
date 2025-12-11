@@ -22,12 +22,6 @@ import {
 
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-
   navMain: [
     {
       title: "Dashboard",
@@ -36,7 +30,7 @@ const data = {
     },
     {
       title: "Reservations",
-      url: "/admin/calendar",
+      url: "/admin/reservation",
       icon: MapPinHouse,
     },
     {
@@ -53,10 +47,10 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
 
   const activeNavMain = data.navMain.map((item) => {
     let isActive = pathname === item.url;
-    if (item.title === "Dashboard") {
-      if (pathname.includes("/eventspaces") || pathname.includes("/reservation")) {
-        isActive = true;
-      }
+    if (item.title === "Reservations") {
+       if (pathname.includes("/reservation")) {
+         isActive = true;
+       }
     }
 
     return {
