@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase"
 import { AdminStats } from "./admin-stats"
+import { RecentRequests } from "./recent-requests"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -41,6 +42,7 @@ export default async function AdminDashboard() {
         <div className="flex flex-col gap-4 w-[300px]">
         <div className="w-full flex flex-col gap-4">
           <AdminStats />
+          <RecentRequests />
         </div>
 
       </div>
