@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CalendarDays, Hourglass } from "lucide-react"
+import { University, Hourglass, Ban } from "lucide-react"
 import Link from "next/link"
 
 export function QuickActions() {
@@ -15,9 +15,9 @@ export function QuickActions() {
           variant="outline"
           className="h-auto flex-1 flex-col gap-2 p-4 border-2 border-[#556378] bg-white hover:bg-gray-50 text-[#556378]"
         >
-          <Link href="/admin/reservations?status=pending">
+          <Link href="/admin/calendar">
             <Hourglass className="h-10 w-10" />
-            <span className="font-bold">View Pending Requests</span>
+            <span className="font-bold">Review Pending Requests</span>
           </Link>
         </Button>
         <Button
@@ -26,8 +26,19 @@ export function QuickActions() {
           className="h-auto flex-1 flex-col gap-2 p-4 border-2 border-[#556378] bg-white hover:bg-gray-50 text-[#556378]"
         >
           <Link href="/admin/calendar">
-            <CalendarDays className="h-10 w-10" />
-            <span className="font-bold">View Calendar</span>
+            <University className="h-10 w-10" />
+            <span className="font-bold">Add Facility</span>
+          </Link>
+        </Button>
+
+         <Button
+          asChild
+          variant="outline"
+          className="h-auto flex-1 flex-col gap-2 p-4 border-2 border-[#556378] bg-white hover:bg-gray-50 text-[#556378]"
+        >
+          <Link href="/admin/calendar">
+            <University className="h-10 w-10" />
+            <span className="font-bold">Block Date</span>
           </Link>
         </Button>
       </CardContent>

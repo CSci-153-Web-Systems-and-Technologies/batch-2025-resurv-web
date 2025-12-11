@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase"
-import { AdminStats } from "./admin-stats"
-import { RecentRequests } from "./recent-requests"
-import { BookingTrendChart } from "./booking-trends"
-import { QuickActions } from "./quick-actions"
+import { AdminStats } from "./components/admin-stats"
+import { RecentRequests } from "./components/recent-requests"
+import { BookingTrendChart } from "./components/booking-trends"
+import { QuickActions } from "./components/quick-actions"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,9 +45,9 @@ export default async function AdminDashboard() {
         </div>
 
         <div className="lg:col-span-2 flex flex-col gap-4">
-            <BookingTrendChart />
-            <RecentRequests />
+            <BookingTrendChart />  
             <QuickActions />
+            <RecentRequests />
           </div>
       </div>
       </main>
