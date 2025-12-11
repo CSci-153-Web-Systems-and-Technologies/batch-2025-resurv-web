@@ -20,8 +20,7 @@ import {
 export default async function ReservationPage() {
   const user = await currentUser();
   if (!user) return redirect("/login");
-  
-  // 1. Fetch Facilities (Public data is usually fine, or you can use server client)
+
   const { data: facilities } = await supabase
     .from('facilities')
     .select('id, title')
@@ -39,7 +38,7 @@ export default async function ReservationPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/student/dashboard" className="text-black">Reservations</BreadcrumbLink>
+                  <BreadcrumbLink href="" className="text-black">Blocked Dates</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -47,7 +46,6 @@ export default async function ReservationPage() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
-            {/* 2. REMOVED pendingReservations PROP */}
             <AdminBlockCard 
                 facilities={safeFacilities} 
                 userId={user.id} 

@@ -39,7 +39,7 @@ export default async function ReservationPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/student/dashboard" className="text-black">Reservations</BreadcrumbLink>
+                  <BreadcrumbLink href="" className="text-black">Reservations</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
