@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { DateRange } from "react-day-picker"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { Check, X, User, Calendar as CalendarIcon, Users, FileText, Clock } from "lucide-react" 
+import { Check, X, User, Calendar as CalendarIcon, Users, FileText, Clock, Inbox } from "lucide-react" 
 import { useAuth } from "@clerk/nextjs";
 import { createClient } from "@supabase/supabase-js"; 
 import {
@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 
-// 1. UPDATED INTERFACE: Removed 'pendingReservations' prop
 interface ReservationFormProps {
   facilities: {
     id: string;
@@ -41,7 +40,6 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   const { getToken } = useAuth();
   const router = useRouter();
 
-  // Helper for Authenticated Supabase Client
   const getSupabase = async () => {
     const token = await getToken({ template: 'supabase' });
     if (!token) return null;
@@ -58,11 +56,8 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
   
   const [viewReservation, setViewReservation] = React.useState<any>(null);
-  
-  // 2. NEW STATE: Store pending requests here
   const [pendingReservations, setPendingReservations] = React.useState<any[]>([]);
 
-  // 3. NEW FETCH: Get Pending Requests securely on the client
   const fetchPendingRequests = React.useCallback(async () => {
     const supabaseClient = await getSupabase();
     if (!supabaseClient) return;
@@ -86,15 +81,13 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     if (!error && data) {
         setPendingReservations(data);
     }
-  }, []); // Empty dependency array means create once
+  }, []); 
 
-  // Trigger fetch on load
   React.useEffect(() => {
     fetchPendingRequests();
   }, [fetchPendingRequests]);
 
 
-  // Filter Pending Requests for the SELECTED Facility
   const relevantPending = React.useMemo(() => {
     return pendingReservations.filter(r => r.facility_id === selectedFacilityId);
   }, [pendingReservations, selectedFacilityId]);
@@ -125,12 +118,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
         alert(`Reservation ${newStatus} successfully!`);
         setViewReservation(null);
-        
-        // 4. REFRESH: Reload the list locally without refreshing the page
         fetchPendingRequests(); 
-        
-        // Also refresh calendar
-        // (This triggers the other useEffect because the component re-renders)
 
     } catch (error: any) {
         console.error(error);
@@ -138,12 +126,10 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     }
   };
 
-  // --- Fetch Calendar Bookings Logic (Existing) ---
   React.useEffect(() => {
     const fetchBookings = async () => {
         if (!selectedFacilityId) return;
         
-        // We use the authenticated client here too, just to be safe with RLS
         const supabaseClient = await getSupabase();
         if(!supabaseClient) return;
 
@@ -173,9 +159,6 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
       return { from: newFrom, to: newTo };
     });
   }, [bookedDates]);
-
-  // ... (handleReserve and rest of logic remains the same)
-  // Just ensure handleReserve calls fetchPendingRequests() on success
 
   const combineDateAndTime = (date: Date, timeStr: string) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -231,7 +214,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
       alert("Success!");
       form.reset();
       setDateRange(undefined);
-      fetchPendingRequests(); // Refresh the list!
+      fetchPendingRequests(); 
     } else {
         alert(error.message);
     }
@@ -256,7 +239,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             <div className="grid gap-4 py-4">
                 <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
                     <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
-                        <User className="h-4 w-4 text" /> Requestor
+                        <User className="h-4 w-4" /> Requestor
                     </h3>
                     <div className="pl-6">
                         <p className="font-bold text-lg">{viewReservation.profiles?.full_name || "Unknown User"}</p>
@@ -318,9 +301,8 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             <X className="h-4 w-4 mr-2" /> Reject
           </Button>
           <Button 
-            variant="outline" 
-            className="border-green-200 bg-green-50 text-green-700 hover:bg-red-100 hover:text-green-800"
-            onClick={() => handleReview(viewReservation.id, 'rejected')}
+            className="bg-green-600 text-white hover:bg-green-700"
+            onClick={() => handleReview(viewReservation.id, 'approved')}
           >
             <Check className="h-4 w-4 mr-2" /> Approve
           </Button>
@@ -366,15 +348,22 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                             </SelectContent>
                         </Select>
 
-                        {/* --- 3. CLICKABLE PENDING REQUESTS --- */}
-                        {relevantPending.length > 0 && (
-                            <div className="mt-2 p-2 bg-[#EEF4ED] rounded-md border border-yellow-200 h-full overflow-y-auto">
-                                <p className="text-lg font-bold text-yellow-800 mb-2 sticky top-0 bg-[#EEF4ED] flex justify-between items-center">
-                                    <span>⚠️ Pending</span>
-                                    <Badge variant="outline" className="text-yellow-800 border-yellow-800 bg-yellow-100">
-                                        {relevantPending.length}
-                                    </Badge>
-                                </p>
+                        {/* --- ALWAYS VISIBLE PENDING REQUESTS CARD --- */}
+                        <div className="mt-2 p-2 bg-[#EEF4ED] rounded-md border border-yellow-200 h-full h-full overflow-y-auto ">
+                            <p className="text-lg font-bold text-yellow-800 mb-2 sticky top-0 bg-[#EEF4ED] flex justify-between items-center">
+                                <span>⚠️ PENDING</span>
+                                <Badge variant="outline" className="text-yellow-800 border-yellow-800 bg-yellow-100">
+                                    {relevantPending.length}
+                                </Badge>
+                            </p>
+                            
+                            {/* Empty State Check */}
+                            {relevantPending.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-28 text-gray-400 italic gap-2">
+                                    <Inbox className="h-8 w-8 opacity-50" />
+                                    <p className="text-xs">No pending requests</p>
+                                </div>
+                            ) : (
                                 <div className="flex flex-col gap-2">
                                     {relevantPending.map((r) => (
                                         <div 
@@ -399,13 +388,13 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                                                 <div className="italic text-gray-400 truncate max-w-[150px]">
                                                     "{r.purpose}"
                                                 </div>
-                                                <span className="text-[10px] text-blue-500 font-bold underline">Review</span>
+                                                <span className="text-[10px] text-blue-500 font-bold hover:underline">Review</span>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </Card>
             </div>
