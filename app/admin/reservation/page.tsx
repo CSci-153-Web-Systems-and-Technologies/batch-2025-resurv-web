@@ -26,9 +26,22 @@ export default async function ReservationPage() {
     .from('facilities')
     .select('id, title')
     .order('title');
+  const { data: pendingReservations } = await supabase
+    .from('reservations')
+    .select(`
+        id, 
+        start_time, 
+        end_time, 
+        facility_id, 
+        purpose,
+        profiles (full_name, email)
+    `)
+    .eq('status', 'pending')
+    .order('start_time', { ascending: true });
 
   // Handle empty or error case
   const safeFacilities = facilities || [];
+  const safePending = pendingReservations || [];
 
   return (
     <SidebarProvider>
@@ -40,11 +53,7 @@ export default async function ReservationPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/student/dashboard" className="text-black">Dashboard</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem className="hidden md:block">
-                  <span className="text-black">New Reservation</span>
+                  <BreadcrumbLink href="/student/dashboard" className="text-black">Reservations</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -55,7 +64,8 @@ export default async function ReservationPage() {
             {/* 2. PASS THE LIST TO THE CARD */}
             <ReservationCard 
                 facilities={safeFacilities} 
-                userId={user.id} 
+                userId={user.id}
+                pendingReservations={safePending} 
             />
         </div>
 
