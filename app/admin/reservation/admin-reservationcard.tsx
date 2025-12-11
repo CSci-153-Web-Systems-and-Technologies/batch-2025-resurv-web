@@ -10,7 +10,7 @@ import { DateRange } from "react-day-picker"
 import { supabase } from "@/lib/supabase" 
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { formatDateRange } from "little-date" // Ensure you have this or use custom formatter
+import { Check, X } from "lucide-react" // Import icons for buttons
 
 import {
   Select,
@@ -27,7 +27,6 @@ interface ReservationFormProps {
     title: string;
   }[];
   userId: string;
-  // 1. New Prop Definition
   pendingReservations: any[]; 
 }
 
@@ -38,10 +37,32 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
   const [bookedDates, setBookedDates] = React.useState<{ from: Date; to: Date }[]>([]);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
 
-  // 2. Filter Pending Requests for the SELECTED Facility
+  // Filter Pending Requests for the SELECTED Facility
   const relevantPending = React.useMemo(() => {
     return pendingReservations.filter(r => r.facility_id === selectedFacilityId);
   }, [pendingReservations, selectedFacilityId]);
+
+  // --- NEW FUNCTION: Handle Approve/Reject ---
+  const handleReview = async (reservationId: string, newStatus: 'approved' | 'rejected') => {
+    const confirmMsg = newStatus === 'approved' ? "Approve this reservation?" : "Reject this reservation?";
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        const { error } = await supabase
+            .from('reservations')
+            .update({ status: newStatus })
+            .eq('id', reservationId);
+
+        if (error) throw error;
+
+        alert(`Reservation ${newStatus} successfully.`);
+        router.refresh(); // Refresh server data to update lists
+        window.location.reload(); // Force reload to ensure UI sync
+    } catch (error: any) {
+        alert("Error updating status: " + error.message);
+    }
+  };
+  // -------------------------------------------
 
   React.useEffect(() => {
     const fetchBookings = async () => {
@@ -91,7 +112,6 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
     const newStart = dateRange.from;
     const newEnd = dateRange.to || dateRange.from;
     
-    // Check conflicts
     const hasConflict = normalizedBookedDates.some((booking) => {
         return newStart < booking.to && newEnd > booking.from;
     });
@@ -104,8 +124,6 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
     }
 
     const formData = new FormData(form);
-    // ... extract form data ...
-    // (kept short for brevity, keep your original extraction logic here)
     const startTimeStr = formData.get("start_time") as string;
     const endTimeStr = formData.get("end_time") as string;
     const purpose = formData.get("purpose") as string;
@@ -121,7 +139,7 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
         start_time: StartTime,
         end_time: EndTime,
         purpose, num_attendees: attendees, special_req: requirements,
-        status: 'pending', // Admins usually "approve" immediately, but let's keep 'pending' or change to 'approved' if you prefer
+        status: 'pending', 
     });
 
     if (!error) {
@@ -173,21 +191,47 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
                             </SelectContent>
                         </Select>
 
+                        {/* --- PENDING RESERVATIONS WITH ACTIONS --- */}
                         {relevantPending.length > 0 && (
                             <div className="mt-2 p-2 bg-[#EEF4ED] rounded-md border border-yellow-200 h-full overflow-y-auto">
-                                <p className="text-xs font-bold text-yellow-800 mb-2 sticky top-0">
+                                <p className="text-xs font-bold text-yellow-800 mb-2 sticky top-0 bg-[#EEF4ED]">
                                     ⚠️ Pending Requests ({relevantPending.length})
                                 </p>
                                 <div className="flex flex-col gap-2">
                                     {relevantPending.map((r) => (
-                                        <div key={r.id} className="text-xs bg-white p-2 rounded border border-yellow-100 shadow-sm">
-                                            <div className="font-semibold text-[#556378]">
-                                                {new Date(r.start_time).toLocaleDateString()}
+                                        <div key={r.id} className="text-xs bg-white p-2 rounded border border-yellow-100 shadow-sm flex flex-col gap-1">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-semibold text-[#556378]">
+                                                        {new Date(r.start_time).toLocaleDateString()}
+                                                    </div>
+                                                    <div className="text-gray-500 truncate max-w-[140px]">
+                                                        {r.profiles?.full_name || "Unknown User"}
+                                                    </div>
+                                                </div>
+                                                {/* ACTIONS */}
+                                                <div className="flex gap-1">
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        className="h-6 w-6 bg-green-100 hover:bg-green-200 text-green-700"
+                                                        onClick={() => handleReview(r.id, 'approved')}
+                                                        title="Approve"
+                                                    >
+                                                        <Check className="h-3 w-3" />
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        className="h-6 w-6 bg-red-100 hover:bg-red-200 text-red-700"
+                                                        onClick={() => handleReview(r.id, 'rejected')}
+                                                        title="Reject"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="text-gray-500 truncate">
-                                                {r.profiles?.full_name || "Unknown User"}
-                                            </div>
-                                            <div className="italic text-gray-400 truncate">
+                                            <div className="italic text-gray-400 truncate text-[10px]">
                                                 "{r.purpose}"
                                             </div>
                                         </div>
@@ -195,7 +239,6 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
                                 </div>
                             </div>
                         )}
-
                     </div>
                 </Card>
             </div>
