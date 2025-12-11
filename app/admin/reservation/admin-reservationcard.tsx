@@ -51,7 +51,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   };
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [selectedFacilityId, setSelectedFacilityId] = React.useState<string>(facilities[0]?.id || "");
+  const [selectedFacilityId, setSelectedFacilityId] = React.useState<string>("");
   const [bookedDates, setBookedDates] = React.useState<{ from: Date; to: Date }[]>([]);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
   
