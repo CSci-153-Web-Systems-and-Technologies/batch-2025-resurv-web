@@ -323,7 +323,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                     disabled={normalizedBookedDates}
                     modifiers={{ booked: normalizedBookedDates }}
                     modifiersClassNames={{ booked: "bg-red-200 text-red-600 line-through opacity-50" }}
-                    className="rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-auto md:w-full"
+                    className="rounded-lg border bg-[#EEF4ED] text-[#556378] p-3 w-auto md:w-full [&_td]:pointer-events-none"
                 />
             </Card>
             
