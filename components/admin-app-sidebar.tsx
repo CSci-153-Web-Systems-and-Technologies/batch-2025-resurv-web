@@ -36,7 +36,7 @@ const data = {
     },
     {
       title: "Reservations",
-      url: "/admin/calendar",
+      url: "/admin/reservation",
       icon: MapPinHouse,
     },
     {
