@@ -6,7 +6,7 @@ import { NavUser } from "@/components/nav-user"
 import { Button } from "./ui/button"
 import { usePathname } from "next/navigation"
 import {
-  BookOpen,
+  MapPinHouse,
   CalendarFold,
   LayoutDashboard,
 
@@ -33,6 +33,11 @@ const data = {
       title: "Dashboard",
       url: "/admin/dashboard",
       icon: LayoutDashboard
+    },
+    {
+      title: "Reservations",
+      url: "/admin/calendar",
+      icon: MapPinHouse,
     },
     {
       title: "Calendar",
