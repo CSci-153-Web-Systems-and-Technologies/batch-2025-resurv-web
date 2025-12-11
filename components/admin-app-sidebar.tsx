@@ -7,9 +7,9 @@ import { Button } from "./ui/button"
 import { usePathname } from "next/navigation"
 import {
   MapPinHouse,
-  CalendarFold,
+  CalendarX2,
   LayoutDashboard,
-
+  CalendarFold,
 } from "lucide-react"
 
 
@@ -34,9 +34,9 @@ const data = {
       icon: MapPinHouse,
     },
     {
-      title: "Calendar",
-      url: "/admin/calendar",
-      icon: CalendarFold,
+      title: "Block Dates",
+      url: "/admin/blocked",
+      icon: CalendarX2,
     },
     
   ],
