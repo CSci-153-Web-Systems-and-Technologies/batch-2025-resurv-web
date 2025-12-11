@@ -40,13 +40,13 @@ export default async function AdminDashboard() {
 
         <main className="flex-1 overflow-y-auto bg-[#EEF4ED] p-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full h-full">
-        <div className=" flex flex-col gap-4">
+        <div className=" flex flex-col gap-4 w-[330px]">
           <AdminStats />
-          <RecentRequests />
         </div>
 
         <div className="lg:col-span-2 flex flex-col gap-4">
             <BookingTrendChart />
+            <RecentRequests />
             <QuickActions />
           </div>
       </div>

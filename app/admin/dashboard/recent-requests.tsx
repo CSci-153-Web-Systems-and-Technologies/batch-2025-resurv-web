@@ -37,14 +37,19 @@ export function RecentRequests() {
   return (
     <Card className="bg-[#EEF4ED] border-[#556378] shadow-none">
       <CardHeader>
-        <CardTitle className=" flex text-[#556378] text-2xl items-center justify-center">Recent Requests</CardTitle>
+        <CardTitle className="flex text-[#556378] text-2xl items-center">
+          Recent Requests
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        {/* 1. CHANGE: Use flex + overflow-x-auto to make a horizontal scrollable row */}
+        {/* pb-2 adds room for the scrollbar if needed */}
+        <div className="flex gap-4 overflow-x-auto pb-4">
           {recentRequests.map((request) => (
             <div
               key={request.id}
-              className="flex items-center justify-between p-4 bg-[#556378] rounded-lg text-white"
+              // 2. CHANGE: Added 'min-w-[280px]' to prevent squishing
+              className="flex items-center justify-between p-4 bg-[#556378] rounded-lg text-white min-w-[280px]"
             >
               <div className="space-y-1">
                 <p className="font-medium">{request.spaceName}</p>
