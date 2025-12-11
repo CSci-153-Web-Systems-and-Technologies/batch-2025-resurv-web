@@ -241,7 +241,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   return (
     <>
     <Dialog open={!!viewReservation} onOpenChange={(open) => !open && setViewReservation(null)}>
-      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378]">
+      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378] border-[#556378]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <FileText className="h-6 w-6" />
@@ -254,9 +254,9 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
         {viewReservation && (
             <div className="grid gap-4 py-4">
-                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
-                        <User className="h-4 w-4" /> Requestor
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
+                        <User className="h-4 w-4 text" /> Requestor
                     </h3>
                     <div className="pl-6">
                         <p className="font-bold text-lg">{viewReservation.profiles?.full_name || "Unknown User"}</p>
@@ -267,8 +267,8 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
                         <CalendarIcon className="h-4 w-4" /> Event Details
                     </h3>
                     <div className="grid grid-cols-2 gap-4 pl-6">
@@ -291,15 +291,15 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                 </div>
 
                 <div className="flex gap-4">
-                     <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
-                         <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                     <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]">
+                         <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase mb-1">
                             <Users className="h-4 w-4" /> Attendees
                          </h3>
                          <p className="pl-6 font-medium">{viewReservation.num_attendees || "N/A"}</p>
                      </div>
                      {viewReservation.special_req && (
-                         <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
-                            <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                         <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]">
+                            <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase mb-1">
                                 <Check className="h-4 w-4" /> Requirements
                             </h3>
                             <p className="pl-6 text-sm">{viewReservation.special_req}</p>
@@ -309,7 +309,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             </div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-2">
           <Button 
             variant="outline" 
             className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
@@ -318,8 +318,9 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             <X className="h-4 w-4 mr-2" /> Reject
           </Button>
           <Button 
-            className="bg-[#556378] text-white hover:bg-[#445166]"
-            onClick={() => handleReview(viewReservation.id, 'approved')}
+            variant="outline" 
+            className="border-green-200 bg-green-50 text-green-700 hover:bg-red-100 hover:text-green-800"
+            onClick={() => handleReview(viewReservation.id, 'rejected')}
           >
             <Check className="h-4 w-4 mr-2" /> Approve
           </Button>
