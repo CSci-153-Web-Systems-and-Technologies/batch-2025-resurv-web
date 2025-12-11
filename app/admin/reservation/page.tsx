@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import { supabase } from "@/lib/supabase" // Import real supabase client
+import { supabase } from "@/lib/supabase" 
 import { ReservationCard } from "./admin-reservationcard"
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -21,27 +21,13 @@ export default async function ReservationPage() {
   const user = await currentUser();
   if (!user) return redirect("/login");
   
-  // 1. FETCH ALL FACILITIES (id, title)
-  const { data: facilities, error } = await supabase
+  // 1. Fetch Facilities (Public data is usually fine, or you can use server client)
+  const { data: facilities } = await supabase
     .from('facilities')
     .select('id, title')
     .order('title');
-  const { data: pendingReservations } = await supabase
-    .from('reservations')
-    .select(`
-        id, 
-        start_time, 
-        end_time, 
-        facility_id, 
-        purpose,
-        profiles (full_name, email)
-    `)
-    .eq('status', 'pending')
-    .order('start_time', { ascending: true });
 
-  // Handle empty or error case
   const safeFacilities = facilities || [];
-  const safePending = pendingReservations || [];
 
   return (
     <SidebarProvider>
@@ -61,11 +47,10 @@ export default async function ReservationPage() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
-            {/* 2. PASS THE LIST TO THE CARD */}
+            {/* 2. REMOVED pendingReservations PROP */}
             <ReservationCard 
                 facilities={safeFacilities} 
-                userId={user.id}
-                pendingReservations={safePending} 
+                userId={user.id} 
             />
         </div>
 

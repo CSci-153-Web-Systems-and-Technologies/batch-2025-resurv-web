@@ -5,10 +5,9 @@ import { Calendar } from "@/components/ui/calendar"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { DateRange } from "react-day-picker"
-import { supabase } from "@/lib/supabase" 
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { Check, X } from "lucide-react" 
+import { Check, X, User, Calendar as CalendarIcon, Users, FileText, Clock } from "lucide-react" 
 import { useAuth } from "@clerk/nextjs";
 import { createClient } from "@supabase/supabase-js"; 
 import {
@@ -19,42 +18,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"     // Make sure to keep your inputs
-import { Textarea } from "@/components/ui/textarea" // Make sure to keep your inputs
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
 
+// 1. UPDATED INTERFACE: Removed 'pendingReservations' prop
 interface ReservationFormProps {
   facilities: {
     id: string;
     title: string;
   }[];
   userId: string;
-  pendingReservations: any[]; 
 }
 
-export function ReservationCard({ facilities, userId, pendingReservations }: ReservationFormProps) {
-  // 1. MOVED INSIDE: Hooks must be here
+export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   const { getToken } = useAuth();
   const router = useRouter();
 
-  // 2. MOVED INSIDE: Helper function using the hook
+  // Helper for Authenticated Supabase Client
   const getSupabase = async () => {
-    const token = await getToken({ template: 'supabase' }); 
-    const supabaseClient = createClient(
+    const token = await getToken({ template: 'supabase' });
+    if (!token) return null;
+    return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: { headers: { Authorization: `Bearer ${token}` } },
-      }
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
     );
-    return supabaseClient;
   };
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [selectedFacilityId, setSelectedFacilityId] = React.useState<string>(facilities[0]?.id || "");
   const [bookedDates, setBookedDates] = React.useState<{ from: Date; to: Date }[]>([]);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
+  
+  const [viewReservation, setViewReservation] = React.useState<any>(null);
+  
+  // 2. NEW STATE: Store pending requests here
+  const [pendingReservations, setPendingReservations] = React.useState<any[]>([]);
 
-  // Filter Pending Requests
+  // 3. NEW FETCH: Get Pending Requests securely on the client
+  const fetchPendingRequests = React.useCallback(async () => {
+    const supabaseClient = await getSupabase();
+    if (!supabaseClient) return;
+
+    const { data, error } = await supabaseClient
+        .from('reservations')
+        .select(`
+            id, 
+            start_time, 
+            end_time, 
+            facility_id, 
+            purpose,
+            num_attendees,
+            special_req,
+            status,
+            profiles (full_name, email, student_id)
+        `)
+        .eq('status', 'pending')
+        .order('start_time', { ascending: true });
+
+    if (!error && data) {
+        setPendingReservations(data);
+    }
+  }, []); // Empty dependency array means create once
+
+  // Trigger fetch on load
+  React.useEffect(() => {
+    fetchPendingRequests();
+  }, [fetchPendingRequests]);
+
+
+  // Filter Pending Requests for the SELECTED Facility
   const relevantPending = React.useMemo(() => {
     return pendingReservations.filter(r => r.facility_id === selectedFacilityId);
   }, [pendingReservations, selectedFacilityId]);
@@ -64,10 +104,13 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
     if (!confirm(confirmMsg)) return;
 
     try {
-        // 3. USE THE HELPER
         const supabaseClient = await getSupabase();
+        if (!supabaseClient) {
+            alert("Authentication failed. Please reload.");
+            return;
+        }
 
-        const { data, error } = await supabaseClient // Use authenticated client
+        const { data, error } = await supabaseClient
             .from('reservations')
             .update({ status: newStatus })
             .eq('id', reservationId)
@@ -81,8 +124,13 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
         }
 
         alert(`Reservation ${newStatus} successfully!`);
-        router.refresh(); 
-        window.location.reload(); 
+        setViewReservation(null);
+        
+        // 4. REFRESH: Reload the list locally without refreshing the page
+        fetchPendingRequests(); 
+        
+        // Also refresh calendar
+        // (This triggers the other useEffect because the component re-renders)
 
     } catch (error: any) {
         console.error(error);
@@ -90,31 +138,28 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
     }
   };
 
-  // ... (Rest of your component: useEffect, handleReserve, and return JSX stays exactly the same)
-  // Just make sure not to delete the useEffect and handleReserve logic you already had!
-  
-  // For brevity, I am not repeating the useEffect/handleReserve/JSX here since they were correct.
-  // Just ensure the bracket below closes the function properly.
-
-  // [PASTE THE REST OF YOUR LOGIC HERE]
-
+  // --- Fetch Calendar Bookings Logic (Existing) ---
   React.useEffect(() => {
     const fetchBookings = async () => {
-      if (!selectedFacilityId) return;
-      
-      const { data, error } = await supabase
-        .from('reservations')
-        .select('start_time, end_time, status')
-        .eq('facility_id', selectedFacilityId)
-        .in('status', ['approved', 'pending']); 
+        if (!selectedFacilityId) return;
+        
+        // We use the authenticated client here too, just to be safe with RLS
+        const supabaseClient = await getSupabase();
+        if(!supabaseClient) return;
 
-      if (data) {
-        const formatted = data.map(b => ({
-            from: new Date(b.start_time),
-            to: new Date(b.end_time)
-        }));
-        setBookedDates(formatted);
-      }
+        const { data } = await supabaseClient
+            .from('reservations')
+            .select('start_time, end_time, status')
+            .eq('facility_id', selectedFacilityId)
+            .in('status', ['approved', 'pending']); 
+
+        if (data) {
+            const formatted = data.map(b => ({
+                from: new Date(b.start_time),
+                to: new Date(b.end_time)
+            }));
+            setBookedDates(formatted);
+        }
     };
     fetchBookings();
   }, [selectedFacilityId]); 
@@ -128,6 +173,9 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
       return { from: newFrom, to: newTo };
     });
   }, [bookedDates]);
+
+  // ... (handleReserve and rest of logic remains the same)
+  // Just ensure handleReserve calls fetchPendingRequests() on success
 
   const combineDateAndTime = (date: Date, timeStr: string) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -167,7 +215,10 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
     const StartTime = combineDateAndTime(newStart, startTimeStr);
     const EndTime = combineDateAndTime(newEnd, endTimeStr);
 
-    const { error } = await supabase.from('reservations').insert({
+    const supabaseClient = await getSupabase();
+    if (!supabaseClient) { setIsSubmitting(false); return; }
+
+    const { error } = await supabaseClient.from('reservations').insert({
         user_id: userId,
         facility_id: selectedFacilityId,
         start_time: StartTime,
@@ -180,13 +231,102 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
       alert("Success!");
       form.reset();
       setDateRange(undefined);
-      router.refresh();
-      window.location.reload(); 
+      fetchPendingRequests(); // Refresh the list!
+    } else {
+        alert(error.message);
     }
     setIsSubmitting(false);
   }
 
   return (
+    <>
+    <Dialog open={!!viewReservation} onOpenChange={(open) => !open && setViewReservation(null)}>
+      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <FileText className="h-6 w-6" />
+            Review Reservation
+          </DialogTitle>
+          <DialogDescription>
+             Review the details below before approving or rejecting.
+          </DialogDescription>
+        </DialogHeader>
+
+        {viewReservation && (
+            <div className="grid gap-4 py-4">
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
+                        <User className="h-4 w-4" /> Requestor
+                    </h3>
+                    <div className="pl-6">
+                        <p className="font-bold text-lg">{viewReservation.profiles?.full_name || "Unknown User"}</p>
+                        <p className="text-sm text-gray-600">{viewReservation.profiles?.email}</p>
+                        {viewReservation.profiles?.student_id && (
+                            <p className="text-sm text-gray-500">ID: {viewReservation.profiles.student_id}</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
+                        <CalendarIcon className="h-4 w-4" /> Event Details
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 pl-6">
+                        <div>
+                            <span className="text-xs text-gray-400 font-bold block">DATE</span>
+                            <span className="font-medium">{new Date(viewReservation.start_time).toLocaleDateString()}</span>
+                        </div>
+                        <div>
+                            <span className="text-xs text-gray-400 font-bold block">TIME</span>
+                            <span className="font-medium">
+                                {new Date(viewReservation.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                                {new Date(viewReservation.end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="pl-6 mt-2">
+                         <span className="text-xs text-gray-400 font-bold block">PURPOSE</span>
+                         <p className="text-sm">{viewReservation.purpose}</p>
+                    </div>
+                </div>
+
+                <div className="flex gap-4">
+                     <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
+                         <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                            <Users className="h-4 w-4" /> Attendees
+                         </h3>
+                         <p className="pl-6 font-medium">{viewReservation.num_attendees || "N/A"}</p>
+                     </div>
+                     {viewReservation.special_req && (
+                         <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
+                            <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                                <Check className="h-4 w-4" /> Requirements
+                            </h3>
+                            <p className="pl-6 text-sm">{viewReservation.special_req}</p>
+                         </div>
+                     )}
+                </div>
+            </div>
+        )}
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button 
+            variant="outline" 
+            className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
+            onClick={() => handleReview(viewReservation.id, 'rejected')}
+          >
+            <X className="h-4 w-4 mr-2" /> Reject
+          </Button>
+          <Button 
+            className="bg-[#556378] text-white hover:bg-[#445166]"
+            onClick={() => handleReview(viewReservation.id, 'approved')}
+          >
+            <Check className="h-4 w-4 mr-2" /> Approve
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
     <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm overflow-hidden items-stretch justify-center">
         <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 justify-center items-start">
             
@@ -225,47 +365,40 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
                             </SelectContent>
                         </Select>
 
-                        {/* --- PENDING RESERVATIONS --- */}
+                        {/* --- 3. CLICKABLE PENDING REQUESTS --- */}
                         {relevantPending.length > 0 && (
                             <div className="mt-2 p-2 bg-[#EEF4ED] rounded-md border border-yellow-200 h-full overflow-y-auto">
-                                <p className="text-xs font-bold text-yellow-800 mb-2 sticky top-0 bg-[#EEF4ED]">
-                                    ⚠️ Pending Requests ({relevantPending.length})
+                                <p className="text-lg font-bold text-yellow-800 mb-2 sticky top-0 bg-[#EEF4ED] flex justify-between items-center">
+                                    <span>⚠️ Pending</span>
+                                    <Badge variant="outline" className="text-yellow-800 border-yellow-800 bg-yellow-100">
+                                        {relevantPending.length}
+                                    </Badge>
                                 </p>
                                 <div className="flex flex-col gap-2">
                                     {relevantPending.map((r) => (
-                                        <div key={r.id} className="text-xs bg-white p-2 rounded border border-yellow-100 shadow-sm flex flex-col gap-1">
+                                        <div 
+                                            key={r.id} 
+                                            onClick={() => setViewReservation(r)} 
+                                            className="text-xs bg-white p-3 rounded border border-yellow-100 shadow-sm flex flex-col gap-1 cursor-pointer hover:bg-yellow-50 hover:border-yellow-300 transition-all group"
+                                        >
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <div className="font-semibold text-[#556378]">
+                                                    <div className="font-bold text-[#556378] text-sm group-hover:text-black">
                                                         {new Date(r.start_time).toLocaleDateString()}
                                                     </div>
-                                                    <div className="text-gray-500 truncate max-w-[140px]">
+                                                    <div className="text-gray-500 font-medium">
                                                         {r.profiles?.full_name || "Unknown User"}
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    <Button
-                                                        type="button"
-                                                        size="icon"
-                                                        className="h-6 w-6 bg-green-100 hover:bg-green-200 text-green-700"
-                                                        onClick={() => handleReview(r.id, 'approved')}
-                                                        title="Approve"
-                                                    >
-                                                        <Check className="h-3 w-3" />
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        size="icon"
-                                                        className="h-6 w-6 bg-red-100 hover:bg-red-200 text-red-700"
-                                                        onClick={() => handleReview(r.id, 'rejected')}
-                                                        title="Reject"
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                    </Button>
+                                                <div className="bg-[#556378]/10 p-1 rounded">
+                                                    <Clock className="h-3 w-3 text-[#556378]" />
                                                 </div>
                                             </div>
-                                            <div className="italic text-gray-400 truncate text-[10px]">
-                                                "{r.purpose}"
+                                            <div className="flex justify-between mt-1">
+                                                <div className="italic text-gray-400 truncate max-w-[150px]">
+                                                    "{r.purpose}"
+                                                </div>
+                                                <span className="text-[10px] text-blue-500 font-bold underline">Review</span>
                                             </div>
                                         </div>
                                     ))}
@@ -277,5 +410,6 @@ export function ReservationCard({ facilities, userId, pendingReservations }: Res
             </div>
         </div>
     </Card>
+    </>
   )
 }
