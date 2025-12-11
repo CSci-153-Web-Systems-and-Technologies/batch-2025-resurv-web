@@ -1,17 +1,17 @@
 import { supabase } from "@/lib/supabase"
 import { AdminStats } from "./admin-stats"
 import { RecentRequests } from "./recent-requests"
+import { BookingTrendChart } from "./booking-trends"
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbSeparator,
+
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 
 export default async function AdminDashboard() {
-  // Fetch stats for the admin
   const { count: pendingCount } = await supabase
     .from('reservations')
     .select('*', { count: 'exact', head: true })
@@ -19,7 +19,6 @@ export default async function AdminDashboard() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header Section from the design */}
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-[#CEDBEE]">
           <div className="flex items-center gap-2 px-4">
             <Separator
@@ -39,12 +38,15 @@ export default async function AdminDashboard() {
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[#EEF4ED] p-4">
-        <div className="flex flex-col gap-4 w-[300px]">
-        <div className="w-full flex flex-col gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full h-full">
+        <div className=" flex flex-col gap-4">
           <AdminStats />
           <RecentRequests />
         </div>
 
+        <div className="lg:col-span-2 flex flex-col gap-4">
+            <BookingTrendChart />
+          </div>
       </div>
       </main>
     </div>
