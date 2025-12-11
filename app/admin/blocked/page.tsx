@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { supabase } from "@/lib/supabase" 
-import { ReservationCard } from "./block-dates-card"
+import { AdminBlockCard } from "./block-dates-card"
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import {
@@ -48,7 +48,7 @@ export default async function ReservationPage() {
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#EEF4ED]">
             {/* 2. REMOVED pendingReservations PROP */}
-            <ReservationCard 
+            <AdminBlockCard 
                 facilities={safeFacilities} 
                 userId={user.id} 
             />

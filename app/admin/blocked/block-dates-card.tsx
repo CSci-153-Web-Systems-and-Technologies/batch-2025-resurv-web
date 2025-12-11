@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { DateRange } from "react-day-picker"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { Check, X, User, Calendar as CalendarIcon, Users, FileText, Clock, Inbox } from "lucide-react" 
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@clerk/nextjs";
@@ -20,15 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
 
 interface ReservationFormProps {
   facilities: {
@@ -38,7 +28,7 @@ interface ReservationFormProps {
   userId: string;
 }
 
-export function ReservationCard({ facilities, userId }: ReservationFormProps) {
+export function AdminBlockCard({ facilities, userId }: ReservationFormProps) {
   const { getToken } = useAuth();
   const router = useRouter();
 
@@ -56,101 +46,31 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   const [selectedFacilityId, setSelectedFacilityId] = React.useState<string>(facilities[0]?.id || "");
   const [bookedDates, setBookedDates] = React.useState<{ from: Date; to: Date }[]>([]);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
-  
-  const [viewReservation, setViewReservation] = React.useState<any>(null);
-  const [pendingReservations, setPendingReservations] = React.useState<any[]>([]);
 
-  const fetchPendingRequests = React.useCallback(async () => {
+  const fetchBookings = React.useCallback(async () => {
+    if (!selectedFacilityId) return;
+    
     const supabaseClient = await getSupabase();
-    if (!supabaseClient) return;
+    if(!supabaseClient) return;
 
-    const { data, error } = await supabaseClient
+    const { data } = await supabaseClient
         .from('reservations')
-        .select(`
-            id, 
-            start_time, 
-            end_time, 
-            facility_id, 
-            purpose,
-            num_attendees,
-            special_req,
-            status,
-            profiles (full_name, email, student_id)
-        `)
-        .eq('status', 'pending')
-        .order('start_time', { ascending: true });
+        .select('start_time, end_time')
+        .eq('facility_id', selectedFacilityId)
+        .in('status', ['approved', 'pending']); 
 
-    if (!error && data) {
-        setPendingReservations(data);
+    if (data) {
+        const formatted = data.map(b => ({
+            from: new Date(b.start_time),
+            to: new Date(b.end_time)
+        }));
+        setBookedDates(formatted);
     }
-  }, []); 
+  }, [selectedFacilityId]);
 
   React.useEffect(() => {
-    fetchPendingRequests();
-  }, [fetchPendingRequests]);
-
-
-  const relevantPending = React.useMemo(() => {
-    return pendingReservations.filter(r => r.facility_id === selectedFacilityId);
-  }, [pendingReservations, selectedFacilityId]);
-
-  const handleReview = async (reservationId: string, newStatus: 'approved' | 'rejected') => {
-    const confirmMsg = newStatus === 'approved' ? "Approve this reservation?" : "Reject this reservation?";
-    if (!confirm(confirmMsg)) return;
-
-    try {
-        const supabaseClient = await getSupabase();
-        if (!supabaseClient) {
-            alert("Authentication failed. Please reload.");
-            return;
-        }
-
-        const { data, error } = await supabaseClient
-            .from('reservations')
-            .update({ status: newStatus })
-            .eq('id', reservationId)
-            .select(); 
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-            alert("Error: Database permission denied. You might not be an 'admin' in the database.");
-            return;
-        }
-
-        alert(`Reservation ${newStatus} successfully!`);
-        setViewReservation(null);
-        fetchPendingRequests(); 
-
-    } catch (error: any) {
-        console.error(error);
-        alert("Error updating status: " + error.message);
-    }
-  };
-
-  React.useEffect(() => {
-    const fetchBookings = async () => {
-        if (!selectedFacilityId) return;
-        
-        const supabaseClient = await getSupabase();
-        if(!supabaseClient) return;
-
-        const { data } = await supabaseClient
-            .from('reservations')
-            .select('start_time, end_time, status')
-            .eq('facility_id', selectedFacilityId)
-            .in('status', ['approved', 'pending']); 
-
-        if (data) {
-            const formatted = data.map(b => ({
-                from: new Date(b.start_time),
-                to: new Date(b.end_time)
-            }));
-            setBookedDates(formatted);
-        }
-    };
     fetchBookings();
-  }, [selectedFacilityId]); 
+  }, [fetchBookings]); 
 
   const normalizedBookedDates = React.useMemo(() => {
     return bookedDates.map((range) => {
@@ -169,12 +89,16 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     return newDate.toISOString(); 
   };
 
-  async function handleReserve(event: React.FormEvent<HTMLFormElement>) {
+  async function handleBlockDate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
     const form = event.currentTarget as HTMLFormElement;
 
-    if (!dateRange?.from) { alert("Please select a date."); setIsSubmitting(false); return; }
+    if (!dateRange?.from) { 
+        alert("Please select a date on the calendar."); 
+        setIsSubmitting(false); 
+        return; 
+    }
 
     const newStart = dateRange.from;
     const newEnd = dateRange.to || dateRange.from;
@@ -184,8 +108,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     });
 
     if (hasConflict) {
-        alert("Conflict detected!");
-        setDateRange(undefined); 
+        alert("Conflict detected! This date is already booked.");
         setIsSubmitting(false);
         return; 
     }
@@ -194,8 +117,6 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     const startTimeStr = formData.get("start_time") as string;
     const endTimeStr = formData.get("end_time") as string;
     const purpose = formData.get("purpose") as string;
-    const attendees = formData.get("attendees") as string;
-    const requirements = formData.get("requirements") as string;
 
     const StartTime = combineDateAndTime(newStart, startTimeStr);
     const EndTime = combineDateAndTime(newEnd, endTimeStr);
@@ -208,27 +129,29 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
         facility_id: selectedFacilityId,
         start_time: StartTime,
         end_time: EndTime,
-        purpose, num_attendees: attendees, special_req: requirements,
-        status: 'pending', 
+        purpose: purpose, 
+        num_attendees: 0, 
+        special_req: "Admin Block / Maintenance",
+        status: 'approved', 
     });
 
     if (!error) {
-      alert("Success!");
+      alert("Date blocked successfully!");
       form.reset();
       setDateRange(undefined);
-      fetchPendingRequests(); 
+      fetchBookings(); 
+      router.refresh();
     } else {
-        alert(error.message);
+        console.error(error);
+        alert("Error blocking date: " + error.message);
     }
     setIsSubmitting(false);
   }
 
   return (
-    <>
     <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm overflow-hidden items-stretch justify-center">
         <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 justify-center items-start">
             
-            {/* Left Column: Calendar */}
             <Card className="flex flex-col w-full md:flex-1 h-auto bg-[#556378] rounded-lg shadow-sm p-4 text-white justify-center items-center">
                 <Calendar
                     mode="range"
@@ -242,41 +165,50 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                 />
             </Card>
             
-            {/* Right Column: Inputs & Pending List */}
             <div className="flex flex-col gap-3 h-full justify-center">
                 <Card className="flex flex-col w-[300px] justify-center items-center bg-[#556378] pt-3 pb-3 rounded-lg text-[#556378] h-auto">
                     <div className="flex flex-col justify-center w-[285px] h-auto m-2 gap-2 px-4">
                         
-                        <Label className="px-1 text-white">Event Space</Label>
+                        <Label className="px-1 text-white text-lg">Block Event Space</Label>
                         <Select value={selectedFacilityId} onValueChange={setSelectedFacilityId}>
                             <SelectTrigger className="w-full bg-[#EEF4ED] border border-[#556378] cursor-pointer">
-                            <SelectValue placeholder="Select an Event Space" />
+                                <SelectValue placeholder="Select an Event Space" />
                             </SelectTrigger>
                             <SelectContent className="bg-[#EEF4ED]">
-                            <SelectGroup>
-                                {facilities.map((space) => (
-                                    <SelectItem key={space.id} value={space.id} className="cursor-pointer">
-                                    {space.title}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
+                                <SelectGroup>
+                                    {facilities.map((space) => (
+                                        <SelectItem key={space.id} value={space.id} className="cursor-pointer">
+                                            {space.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
                             </SelectContent>
+                        </Select>
                         
-                        <form className= "mt-5"> 
-                            <Label htmlFor="purpose" className="text-[#EEF4ED] m-1">Purpose of Blocking Date</Label>
-                            <Textarea name="purpose" required className="w-full max-w-[300px] text-[#EEF4ED]" />
+                        <form onSubmit={handleBlockDate} className="mt-2 flex flex-col gap-2"> 
+                            <Label htmlFor="start_time" className="px-1 text-white text-xs mt-2">Start Time</Label>
+                            <Input name="start_time" type="time" required defaultValue="08:00" className="px-1 text-[#EEF4ED] [&::-webkit-calendar-picker-indicator]:hidden" />
                             
-                            <Button type="submit" disabled={isSubmitting} className="mt-4 bg-[#EEF4ED] text-[#556378] hover:bg-slate-200 cursor-pointer m-1 mt-4">
-                            {isSubmitting ? "Booking..." : "Confirm"}
+                            <Label htmlFor="end_time" className="px-1 text-white text-xs">End Time</Label>
+                            <Input name="end_time" type="time" required defaultValue="17:00" className="px-1 text-[#EEF4ED] [&::-webkit-calendar-picker-indicator]:hidden" /> 
+
+                            <Label htmlFor="purpose" className="text-white px-1 text-xs mt-1">Reason for Blocking</Label>
+                            <Textarea 
+                                name="purpose" 
+                                required 
+                                placeholder="e.g. Maintenance, School Holiday" 
+                                className="w-full max-w-[300px] text-[#EEF4ED] h-20" 
+                            />
+                            
+                            <Button type="submit" disabled={isSubmitting} className="mt-4 bg-red-500 text-white hover:bg-red-600 cursor-pointer w-full">
+                                {isSubmitting ? "Blocking..." : "Confirm Block"}
                             </Button>
                         </form>
 
-                        </Select>
                     </div>
                 </Card>
             </div>
         </div>
     </Card>
-    </>
   )
 }
