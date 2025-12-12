@@ -368,13 +368,11 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             </Card>
             
             {/* RIGHT: LISTS & FORM */}
-            <div className="flex flex-col gap-4 h-full w-[300px]">
+            <div className="flex flex-col gap-3 h-full w-[300px]">
                 <Card className="flex flex-col h-full bg-[#556378] p-4 rounded-lg text-[#556378]">
-                    
-                    <Label className="text-white mb-2 block">Event Space</Label>
                     <Select value={selectedFacilityId} onValueChange={setSelectedFacilityId}>
-                        <SelectTrigger className="w-full bg-[#EEF4ED] border border-[#556378]">
-                            <SelectValue placeholder="Select an Event Space" />
+                        <SelectTrigger className=" font-bold w-full bg-[#EEF4ED] border border-[#556378]">
+                            <SelectValue placeholder="Select an Event Space"/>
                         </SelectTrigger>
                         <SelectContent className="bg-[#EEF4ED]">
                             <SelectGroup>
@@ -386,7 +384,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                     </Select>
 
                     {/* --- TABS --- */}
-                    <Tabs defaultValue="pending" className="w-full mt-4 flex-1 flex flex-col">
+                    <Tabs defaultValue="pending" className="w-full mt-2 flex-1 flex flex-col">
                         <TabsList className="grid w-full grid-cols-2 bg-[#445166]">
                             <TabsTrigger value="pending" className="data-[state=active]:bg-[#EEF4ED] text-white data-[state=active]:text-[#556378]">Pending</TabsTrigger>
                             <TabsTrigger value="approved" className="data-[state=active]:bg-[#EEF4ED] text-white data-[state=active]:text-[#556378]">Approved</TabsTrigger>
