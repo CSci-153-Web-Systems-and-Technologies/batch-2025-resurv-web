@@ -9,7 +9,7 @@ export default async function AdminDashboardPage() {
   // 1. Authenticate with Supabase
   const { getToken } = await auth();
   const token = await getToken({ template: 'supabase' });
-  const { stats, chartData } = await fetchDashboardData(token);
+  const { stats, chartData, recentRequests } = await fetchDashboardData(token);
   return (
     <div className="flex flex-col h-full">
       <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 bg-[#EEF4ED]">
@@ -35,7 +35,7 @@ export default async function AdminDashboardPage() {
           <div className="lg:col-span-2 flex flex-col gap-4">
             <BookingTrendChart data={chartData}/>
             <QuickActions />
-            <RecentRequests />
+            <RecentRequests data={recentRequests}/>
           </div>
 
         </div>
