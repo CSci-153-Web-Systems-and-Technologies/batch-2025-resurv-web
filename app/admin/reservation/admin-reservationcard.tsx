@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { DateRange } from "react-day-picker"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { Check, X, User, Calendar as CalendarIcon, Users, FileText, Clock, Inbox } from "lucide-react" 
+import { Check, X, User, Calendar as CalendarIcon, Users, FileText, Clock, Inbox, ShieldCheck, Trash2 } from "lucide-react" 
 import { useAuth } from "@clerk/nextjs";
 import { createClient } from "@supabase/supabase-js"; 
 import {
@@ -26,6 +26,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 
 interface ReservationFormProps {
@@ -56,41 +62,43 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: undefined, to: undefined })
   
   const [viewReservation, setViewReservation] = React.useState<any>(null);
+  
   const [pendingReservations, setPendingReservations] = React.useState<any[]>([]);
+  const [approvedReservations, setApprovedReservations] = React.useState<any[]>([]);
 
-  const fetchPendingRequests = React.useCallback(async () => {
+  const fetchReservations = React.useCallback(async () => {
     const supabaseClient = await getSupabase();
     if (!supabaseClient) return;
 
     const { data, error } = await supabaseClient
         .from('reservations')
         .select(`
-            id, 
-            start_time, 
-            end_time, 
-            facility_id, 
-            purpose,
-            num_attendees,
-            special_req,
-            status,
+            id, start_time, end_time, facility_id, purpose,
+            num_attendees, special_req, status,
             profiles (full_name, email, student_id)
         `)
-        .eq('status', 'pending')
+        .in('status', ['pending', 'approved', 'Approved']) 
         .order('start_time', { ascending: true });
 
     if (!error && data) {
-        setPendingReservations(data);
+        setPendingReservations(data.filter(r => r.status === 'pending'));
+        // Normalize status check for both 'approved' and 'Approved'
+        setApprovedReservations(data.filter(r => r.status.toLowerCase() === 'approved'));
     }
   }, []); 
 
   React.useEffect(() => {
-    fetchPendingRequests();
-  }, [fetchPendingRequests]);
-
+    fetchReservations();
+  }, [fetchReservations]);
 
   const relevantPending = React.useMemo(() => {
     return pendingReservations.filter(r => r.facility_id === selectedFacilityId);
   }, [pendingReservations, selectedFacilityId]);
+
+  const relevantApproved = React.useMemo(() => {
+    return approvedReservations.filter(r => r.facility_id === selectedFacilityId);
+  }, [approvedReservations, selectedFacilityId]);
+
 
   const handleReview = async (reservationId: string, newStatus: 'approved' | 'rejected') => {
     const confirmMsg = newStatus === 'approved' ? "Approve this reservation?" : "Reject this reservation?";
@@ -98,10 +106,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
     try {
         const supabaseClient = await getSupabase();
-        if (!supabaseClient) {
-            alert("Authentication failed. Please reload.");
-            return;
-        }
+        if (!supabaseClient) return;
 
         const { data, error } = await supabaseClient
             .from('reservations')
@@ -110,34 +115,71 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             .select(); 
 
         if (error) throw error;
-
         if (!data || data.length === 0) {
-            alert("Error: Database permission denied. You might not be an 'admin' in the database.");
-            return;
+            alert("Error: Permission denied."); return;
         }
 
         alert(`Reservation ${newStatus} successfully!`);
         setViewReservation(null);
-        fetchPendingRequests(); 
+        fetchReservations(); 
 
     } catch (error: any) {
         console.error(error);
-        alert("Error updating status: " + error.message);
+        alert("Error: " + error.message);
     }
   };
 
+  const handleDelete = async (reservationId: string) => {
+    if (!confirm("Are you sure you want to cancel this reservation? This cannot be undone.")) return;
+
+    try {
+        const supabaseClient = await getSupabase();
+        if (!supabaseClient) return;
+
+        // 1. Perform Delete AND Select the deleted row to verify
+        const { data, error } = await supabaseClient
+            .from('reservations')
+            .delete()
+            .eq('id', reservationId)
+            .select(); // <--- Important: Asks database "Did you actually delete it?"
+
+        if (error) throw error;
+
+        // 2. CHECK: If data is empty, RLS blocked the delete
+        if (!data || data.length === 0) {
+            alert("Error: Permission denied. You might not be an 'admin' in the database.");
+            return;
+        }
+
+        alert("Reservation cancelled successfully.");
+        setViewReservation(null); // Close modal
+        
+        // 3. REFRESH: Update the list immediately
+        fetchReservations(); 
+
+    } catch (error: any) {
+        console.error(error);
+        alert("Error: " + error.message);
+    }
+  };
+
+  // --- CALENDAR ---
+  
   React.useEffect(() => {
     const fetchBookings = async () => {
-        if (!selectedFacilityId) return;
-        
         const supabaseClient = await getSupabase();
         if(!supabaseClient) return;
 
-        const { data } = await supabaseClient
+        let query = supabaseClient
             .from('reservations')
             .select('start_time, end_time, status')
-            .eq('facility_id', selectedFacilityId)
-            .in('status', ['approved', 'pending']); 
+            .in('status', ['approved', 'pending', 'Approved']);
+
+        if (selectedFacilityId) {
+            query = query.eq('facility_id', selectedFacilityId);
+        }
+
+        const { data } = await query;
 
         if (data) {
             const formatted = data.map(b => ({
@@ -148,7 +190,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
         }
     };
     fetchBookings();
-  }, [selectedFacilityId]); 
+  }, [selectedFacilityId, pendingReservations, approvedReservations]); 
 
   const normalizedBookedDates = React.useMemo(() => {
     return bookedDates.map((range) => {
@@ -172,7 +214,12 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     setIsSubmitting(true);
     const form = event.currentTarget as HTMLFormElement;
 
-    if (!dateRange?.from) { alert("Please select a date."); setIsSubmitting(false); return; }
+    if (!selectedFacilityId) {
+        alert("Please select an Event Space first.");
+        setIsSubmitting(false);
+        return;
+    }
+    if (!dateRange?.from) { alert("Please select a date on the calendar."); setIsSubmitting(false); return; }
 
     const newStart = dateRange.from;
     const newEnd = dateRange.to || dateRange.from;
@@ -214,7 +261,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
       alert("Success!");
       form.reset();
       setDateRange(undefined);
-      fetchPendingRequests(); 
+      fetchReservations(); 
     } else {
         alert(error.message);
     }
@@ -223,20 +270,34 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
   return (
     <>
+    {/* --- UNIVERSAL DETAILS MODAL --- */}
     <Dialog open={!!viewReservation} onOpenChange={(open) => !open && setViewReservation(null)}>
       <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378] border-[#556378]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <FileText className="h-6 w-6" />
-            Review Reservation
+            {viewReservation?.status === 'pending' ? 'Review Request' : 'Reservation Details'}
           </DialogTitle>
           <DialogDescription>
-             Review the details below before approving or rejecting.
+             {viewReservation?.status === 'pending' 
+                ? "Review the request below to approve or reject." 
+                : "View details of this approved reservation."}
           </DialogDescription>
         </DialogHeader>
 
         {viewReservation && (
             <div className="grid gap-4 py-4">
+                {/* Status Badge in Header */}
+                <div className="flex justify-end">
+                    <Badge className={
+                        viewReservation.status === 'pending' 
+                        ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" 
+                        : "bg-green-100 text-green-800 hover:bg-green-100"
+                    }>
+                        {viewReservation.status.toUpperCase()}
+                    </Badge>
+                </div>
+
                 <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
                     <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
                         <User className="h-4 w-4" /> Requestor
@@ -244,68 +305,47 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                     <div className="pl-6">
                         <p className="font-bold text-lg">{viewReservation.profiles?.full_name || "Unknown User"}</p>
                         <p className="text-sm text-gray-600">{viewReservation.profiles?.email}</p>
-                        {viewReservation.profiles?.student_id && (
-                            <p className="text-sm text-gray-500">ID: {viewReservation.profiles.student_id}</p>
-                        )}
                     </div>
                 </div>
-
                 <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
                     <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
                         <CalendarIcon className="h-4 w-4" /> Event Details
                     </h3>
-                    <div className="grid grid-cols-2 gap-4 pl-6">
-                        <div>
-                            <span className="text-xs text-gray-400 font-bold block">DATE</span>
-                            <span className="font-medium">{new Date(viewReservation.start_time).toLocaleDateString()}</span>
+                    <div className="pl-6">
+                        <span className="font-medium text-lg">{new Date(viewReservation.start_time).toLocaleDateString()}</span>
+                        <div className="text-sm text-gray-600">
+                             {new Date(viewReservation.start_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} - 
+                             {new Date(viewReservation.end_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
                         </div>
-                        <div>
-                            <span className="text-xs text-gray-400 font-bold block">TIME</span>
-                            <span className="font-medium">
-                                {new Date(viewReservation.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                                {new Date(viewReservation.end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </span>
+                        <div className="mt-2 pt-2 border-t border-gray-100">
+                            <span className="text-xs text-gray-400 font-bold">PURPOSE</span>
+                            <p className="text-sm text-gray-700">{viewReservation.purpose}</p>
                         </div>
                     </div>
-                    <div className="pl-6 mt-2">
-                         <span className="text-xs text-gray-400 font-bold block">PURPOSE</span>
-                         <p className="text-sm">{viewReservation.purpose}</p>
-                    </div>
-                </div>
-
-                <div className="flex gap-4">
-                     <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]">
-                         <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase mb-1">
-                            <Users className="h-4 w-4" /> Attendees
-                         </h3>
-                         <p className="pl-6 font-medium">{viewReservation.num_attendees || "N/A"}</p>
-                     </div>
-                     {viewReservation.special_req && (
-                         <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]">
-                            <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase mb-1">
-                                <Check className="h-4 w-4" /> Requirements
-                            </h3>
-                            <p className="pl-6 text-sm">{viewReservation.special_req}</p>
-                         </div>
-                     )}
                 </div>
             </div>
         )}
 
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button 
-            variant="outline" 
-            className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
-            onClick={() => handleReview(viewReservation.id, 'rejected')}
-          >
-            <X className="h-4 w-4 mr-2" /> Reject
-          </Button>
-          <Button 
-            className="bg-green-600 text-white hover:bg-green-700"
-            onClick={() => handleReview(viewReservation.id, 'approved')}
-          >
-            <Check className="h-4 w-4 mr-2" /> Approve
-          </Button>
+          {/* Conditional Footer Buttons based on Status */}
+          {viewReservation?.status === 'pending' ? (
+            <>
+                <Button variant="outline" className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100" onClick={() => handleReview(viewReservation.id, 'rejected')}>
+                    <X className="h-4 w-4 mr-2" /> Reject
+                </Button>
+                <Button className="bg-green-600 text-white hover:bg-green-700" onClick={() => handleReview(viewReservation.id, 'approved')}>
+                    <Check className="h-4 w-4 mr-2" /> Approve
+                </Button>
+            </>
+          ) : (
+            <Button 
+                variant="destructive" 
+                className="w-full sm:w-auto"
+                onClick={() => handleDelete(viewReservation.id)}
+            >
+                <Trash2 className="h-4 w-4 mr-2" /> Cancel Reservation
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -313,7 +353,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     <Card className="flex flex-col w-full max-w-5xl mx-auto mt-2 bg-[#dce5f2] border border-slate-400 rounded-xl shadow-sm overflow-hidden items-stretch justify-center">
         <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 justify-center items-start">
             
-            {/* Left Column: Calendar */}
+            {/* LEFT: CALENDAR */}
             <Card className="flex flex-col w-full md:flex-1 h-auto bg-[#556378] rounded-lg shadow-sm p-4 text-white justify-center items-center">
                 <Calendar
                     mode="range"
@@ -327,40 +367,34 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                 />
             </Card>
             
-            {/* Right Column: Inputs & Pending List */}
-            <div className="flex flex-col gap-4 h-full">
-                <Card className="flex flex-col w-[300px] h-full justify-center items-center bg-[#556378] pt-3 pb-3 rounded-lg text-[#556378]">
-                    <div className="flex flex-col justify-start w-[285px] h-full m-2 gap-2 px-4">
-                        
-                        <Label className="px-1 text-white">Event Space</Label>
-                        <Select value={selectedFacilityId} onValueChange={setSelectedFacilityId}>
-                            <SelectTrigger className="w-full bg-[#EEF4ED] border border-[#556378] cursor-pointer">
-                            <SelectValue placeholder="Select an Event Space" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#EEF4ED]">
+            {/* RIGHT: LISTS & FORM */}
+            <div className="flex flex-col gap-3 h-full w-[300px]">
+                <Card className="flex flex-col h-full bg-[#556378] p-4 rounded-lg text-[#556378]">
+                    <Select value={selectedFacilityId} onValueChange={setSelectedFacilityId}>
+                        <SelectTrigger className=" font-bold w-full bg-[#EEF4ED] border border-[#556378]">
+                            <SelectValue placeholder="Select an Event Space"/>
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#EEF4ED]">
                             <SelectGroup>
                                 {facilities.map((space) => (
-                                    <SelectItem key={space.id} value={space.id} className="cursor-pointer">
-                                    {space.title}
-                                    </SelectItem>
+                                    <SelectItem key={space.id} value={space.id}>{space.title}</SelectItem>
                                 ))}
                             </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                        </SelectContent>
+                    </Select>
 
-                        {/* --- ALWAYS VISIBLE PENDING REQUESTS CARD --- */}
-                        <div className="mt-2 p-2 bg-[#EEF4ED] rounded-md border border-yellow-200 h-full h-full overflow-y-auto ">
-                            <p className="text-lg font-bold text-yellow-800 mb-2 sticky top-0 bg-[#EEF4ED] flex justify-between items-center">
-                                <span>⚠️ PENDING</span>
-                                <Badge variant="outline" className="text-yellow-800 border-yellow-800 bg-yellow-100">
-                                    {relevantPending.length}
-                                </Badge>
-                            </p>
-                            
-                            {/* Empty State Check */}
+                    {/* --- TABS --- */}
+                    <Tabs defaultValue="pending" className="w-full mt-2 flex-1 flex flex-col">
+                        <TabsList className="grid w-full grid-cols-2 bg-[#445166]">
+                            <TabsTrigger value="pending" className="data-[state=active]:bg-[#EEF4ED] text-white data-[state=active]:text-[#556378]">Pending</TabsTrigger>
+                            <TabsTrigger value="approved" className="data-[state=active]:bg-[#EEF4ED] text-white data-[state=active]:text-[#556378]">Approved</TabsTrigger>
+                        </TabsList>
+                        
+                        {/* PENDING CONTENT */}
+                        <TabsContent value="pending" className="flex-1 mt-2 bg-[#EEF4ED] rounded-md border border-yellow-200 p-2 overflow-y-auto h-full">
                             {relevantPending.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-28 text-gray-400 italic gap-2">
-                                    <Inbox className="h-8 w-8 opacity-50" />
+                                <div className="flex flex-col items-center justify-center h-20 text-gray-400 italic gap-2">
+                                    <Inbox className="h-6 w-6 opacity-50" />
                                     <p className="text-xs">No pending requests</p>
                                 </div>
                             ) : (
@@ -369,33 +403,48 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                                         <div 
                                             key={r.id} 
                                             onClick={() => setViewReservation(r)} 
-                                            className="text-xs bg-white p-3 rounded border border-yellow-100 shadow-sm flex flex-col gap-1 cursor-pointer hover:bg-yellow-50 hover:border-yellow-300 transition-all group"
+                                            className="text-xs bg-white p-2 rounded border border-yellow-100 shadow-sm cursor-pointer hover:bg-yellow-50 transition-colors"
                                         >
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="font-bold text-[#556378] text-sm group-hover:text-black">
-                                                        {new Date(r.start_time).toLocaleDateString()}
-                                                    </div>
-                                                    <div className="text-gray-500 font-medium">
-                                                        {r.profiles?.full_name || "Unknown User"}
-                                                    </div>
-                                                </div>
-                                                <div className="bg-[#556378]/10 p-1 rounded">
-                                                    <Clock className="h-3 w-3 text-[#556378]" />
-                                                </div>
+                                            <div className="flex justify-between font-bold text-[#556378]">
+                                                <span>{new Date(r.start_time).toLocaleDateString()}</span>
+                                                <Badge variant="outline" className="text-[10px] h-4 border-yellow-500 text-yellow-600">Review</Badge>
                                             </div>
-                                            <div className="flex justify-between mt-1">
-                                                <div className="italic text-gray-400 truncate max-w-[150px]">
-                                                    "{r.purpose}"
-                                                </div>
-                                                <span className="text-[10px] text-blue-500 font-bold hover:underline">Review</span>
+                                            <div className="text-gray-500 truncate">{r.profiles?.full_name}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </TabsContent>
+
+                        {/* APPROVED CONTENT */}
+                        <TabsContent value="approved" className="flex-1 mt-2 bg-[#EEF4ED] rounded-md border border-green-200 p-2 overflow-y-auto ">
+                            {relevantApproved.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-20 text-gray-400 italic gap-2">
+                                    <ShieldCheck className="h-6 w-6 opacity-50" />
+                                    <p className="text-xs">No approved bookings</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {relevantApproved.map((r) => (
+                                        <div 
+                                            key={r.id} 
+                                            onClick={() => setViewReservation(r)} // CLICK TO OPEN MODAL
+                                            className="text-xs bg-white p-2 rounded border border-green-100 shadow-sm cursor-pointer hover:bg-green-50 transition-colors"
+                                        >
+                                            <div className="flex justify-between font-bold text-[#556378]">
+                                                <span>{new Date(r.start_time).toLocaleDateString()}</span>
+                                                <Badge variant="outline" className="text-[10px] h-4 border-green-500 text-green-600">Active</Badge>
+                                            </div>
+                                            <div className="text-gray-500 truncate max-w-[150px]">
+                                                {r.profiles?.full_name || "Admin Block"}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
-                        </div>
-                    </div>
+                        </TabsContent>
+                    </Tabs>
+                    
                 </Card>
             </div>
         </div>
