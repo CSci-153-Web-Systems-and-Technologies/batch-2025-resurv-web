@@ -33,7 +33,7 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <BookingTrendChart />
+            <BookingTrendChart data={chartData}/>
             <QuickActions />
             <RecentRequests />
           </div>
