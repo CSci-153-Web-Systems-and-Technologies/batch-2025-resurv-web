@@ -35,7 +35,7 @@ export default async function AdminDashboardPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="" className="text-black">
+                  <BreadcrumbLink href="#" className="text-black">
                     Dashboard
                   </BreadcrumbLink>
                 </BreadcrumbItem>
