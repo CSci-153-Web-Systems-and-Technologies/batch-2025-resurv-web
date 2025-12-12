@@ -130,21 +130,31 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
   };
 
   const handleDelete = async (reservationId: string) => {
-    if (!confirm("Are you sure you want to cancel/delete this approved reservation?")) return;
+    if (!confirm("Are you sure you want to cancel this reservation? This cannot be undone.")) return;
 
     try {
         const supabaseClient = await getSupabase();
         if (!supabaseClient) return;
 
-        const { error } = await supabaseClient
+        // 1. Perform Delete AND Select the deleted row to verify
+        const { data, error } = await supabaseClient
             .from('reservations')
             .delete()
-            .eq('id', reservationId);
+            .eq('id', reservationId)
+            .select(); // <--- Important: Asks database "Did you actually delete it?"
 
         if (error) throw error;
 
-        alert("Reservation cancelled.");
-        setViewReservation(null); // Close modal if open
+        // 2. CHECK: If data is empty, RLS blocked the delete
+        if (!data || data.length === 0) {
+            alert("Error: Permission denied. You might not be an 'admin' in the database.");
+            return;
+        }
+
+        alert("Reservation cancelled successfully.");
+        setViewReservation(null); // Close modal
+        
+        // 3. REFRESH: Update the list immediately
         fetchReservations(); 
 
     } catch (error: any) {
