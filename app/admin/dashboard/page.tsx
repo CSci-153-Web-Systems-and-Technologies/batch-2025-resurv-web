@@ -1,60 +1,15 @@
-import { supabase } from "@/lib/supabase"
 import { AdminStats } from "./components/admin-stats"
 import { RecentRequests } from "./components/recent-requests"
 import { BookingTrendChart } from "./components/booking-trends"
 import { QuickActions } from "./components/quick-actions"
 import { auth } from "@clerk/nextjs/server"
-import { createClient } from "@supabase/supabase-js"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+import { fetchDashboardData } from "./data-fetching"
 
 export default async function AdminDashboardPage() {
   // 1. Authenticate with Supabase
   const { getToken } = await auth();
   const token = await getToken({ template: 'supabase' });
-  
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${token}` } } }
-  );
-
-  const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  
-  const [
-    pendingResult, 
-    approvedResult, 
-    activeVenuesResult, 
-    totalVenuesResult
-  ] = await Promise.all([
-    supabase
-      .from('reservations')
-      .select('*', { count: 'exact', head: true }) 
-      .eq('status', 'pending'),
-
-    supabase
-      .from('reservations')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .gte('start_time', firstDay), 
-
-    supabase
-      .from('facilities')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true),
-
-    supabase
-      .from('facilities')
-      .select('*', { count: 'exact', head: true })
-  ]);
-
+  const { stats, chartData } = await fetchDashboardData(token);
   return (
     <div className="flex flex-col h-full">
       <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 bg-[#EEF4ED]">
@@ -70,10 +25,10 @@ export default async function AdminDashboardPage() {
           
           <div className="flex flex-col gap-4">
             <AdminStats 
-                pendingCount={pendingResult.count || 0}
-                approvedCount={approvedResult.count || 0}
-                activeVenuesCount={activeVenuesResult.count || 0}
-                totalVenuesCount={totalVenuesResult.count || 0}
+                pendingCount={stats.pending}
+                approvedCount={stats.approvedThisMonth}
+                activeVenuesCount={stats.activeVenues}
+                totalVenuesCount={stats.totalVenues}
             />
           </div>
 
