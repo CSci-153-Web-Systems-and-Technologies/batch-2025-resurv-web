@@ -39,7 +39,6 @@ export default async function AdminDashboardPage() {
                     Dashboard
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
               </BreadcrumbList>
             </Breadcrumb>
           </div>
