@@ -46,7 +46,7 @@ export function AdminStats({
         <Card key={index} className="bg-[#EEF4ED] border-[#556378] shadow-none">
           <CardContent className="p-6 flex justify-between items-start">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-[#556378]">{stat.title}</p>
+              <p className="text-2xl font-medium text-[#556378]">{stat.title}</p>
               <div className="text-4xl font-bold text-[#556378]">{stat.value}</div>
             </div>
             <div className="p-2 bg-white rounded-full border-2 border-[#556378]">

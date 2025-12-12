@@ -12,45 +12,72 @@ export async function fetchDashboardData(token: string | null) {
   const previousYear = currentYear - 1;
   const firstDayOfMonth = new Date(currentYear, now.getMonth(), 1).toISOString();
 
+  // Define valid statuses for the chart (Case insensitive handling)
+  const approvedStatuses = ['approved', 'Approved'];
+
   const [
     pendingResult, 
     approvedThisMonthResult, 
     activeVenuesResult, 
     totalVenuesResult,
     chartDataResult,
-    // 1. NEW: Fetch Recent Requests
     recentRequestsResult
   ] = await Promise.all([
     // Stats
     supabase.from('reservations').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('reservations').select('*', { count: 'exact', head: true }).eq('status', 'approved').gte('start_time', firstDayOfMonth),
+    
+    // Approved This Month (Check both cases)
+    supabase.from('reservations').select('*', { count: 'exact', head: true }).in('status', approvedStatuses).gte('start_time', firstDayOfMonth),
+    
     supabase.from('facilities').select('*', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('facilities').select('*', { count: 'exact', head: true }),
-    // Chart
-    supabase.from('reservations').select('start_time').eq('status', 'approved'),
     
-    // 2. NEW QUERY: Get the 5 most recent reservations with joins
+    // Chart Data (Check both cases)
+    supabase.from('reservations').select('start_time').in('status', approvedStatuses),
+    
+    // Recent Requests
     supabase
         .from('reservations')
         .select(`
-            id,
-            created_at,
-            status,
-            start_time,
+            id, created_at, status, start_time,
             facilities (title),
             profiles (full_name)
         `)
-        .order('created_at', { ascending: false }) // Newest first
+        .order('created_at', { ascending: false })
         .limit(5)
   ]);
 
-  // ... (Keep existing Chart Data processing logic here) ...
+  // --- DEBUGGING: Check your terminal to see if this prints data ---
+  console.log("Chart Raw Data:", chartDataResult.data); 
+  // ---------------------------------------------------------------
+
   const monthlyData = [
     { name: "Jan", current: 0, previous: 0 },
-    // ... fill rest of months ...
+    { name: "Feb", current: 0, previous: 0 },
+    { name: "Mar", current: 0, previous: 0 },
+    { name: "Apr", current: 0, previous: 0 },
+    { name: "May", current: 0, previous: 0 },
+    { name: "Jun", current: 0, previous: 0 },
+    { name: "Jul", current: 0, previous: 0 },
+    { name: "Aug", current: 0, previous: 0 },
+    { name: "Sep", current: 0, previous: 0 },
+    { name: "Oct", current: 0, previous: 0 },
+    { name: "Nov", current: 0, previous: 0 },
+    { name: "Dec", current: 0, previous: 0 },
   ];
+
   if (chartDataResult.data) {
-     // ... loop logic ...
+    chartDataResult.data.forEach((booking) => {
+        const date = new Date(booking.start_time);
+        const year = date.getFullYear();
+        const monthIndex = date.getMonth(); 
+
+        if (year === currentYear) {
+            monthlyData[monthIndex].current += 1;
+        } else if (year === previousYear) {
+            monthlyData[monthIndex].previous += 1;
+        }
+    });
   }
 
   return {
@@ -61,7 +88,6 @@ export async function fetchDashboardData(token: string | null) {
         totalVenues: totalVenuesResult.count || 0,
     },
     chartData: monthlyData,
-    // 3. Return the recent requests
     recentRequests: recentRequestsResult.data || []
   };
 }
