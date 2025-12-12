@@ -15,19 +15,9 @@ export function QuickActions() {
           variant="outline"
           className="h-auto flex-1 flex-col gap-2 p-4 border-2 border-[#556378] bg-white hover:bg-gray-50 text-[#556378]"
         >
-          <Link href="/admin/calendar">
+          <Link href="/admin/reservation">
             <Hourglass className="h-10 w-10" />
             <span className="font-bold">Review Pending Requests</span>
-          </Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          className="h-auto flex-1 flex-col gap-2 p-4 border-2 border-[#556378] bg-white hover:bg-gray-50 text-[#556378]"
-        >
-          <Link href="/admin/calendar">
-            <University className="h-10 w-10" />
-            <span className="font-bold">Add Facility</span>
           </Link>
         </Button>
 
@@ -36,7 +26,7 @@ export function QuickActions() {
           variant="outline"
           className="h-auto flex-1 flex-col gap-2 p-4 border-2 border-[#556378] bg-white hover:bg-gray-50 text-[#556378]"
         >
-          <Link href="/admin/calendar">
+          <Link href="/admin/blocked">
             <University className="h-10 w-10" />
             <span className="font-bold">Block Date</span>
           </Link>
