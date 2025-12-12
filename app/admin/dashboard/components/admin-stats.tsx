@@ -1,30 +1,45 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { Clock, CheckCircle2, MapPin } from "lucide-react"
+import { Clock, CheckCircle2, MapPin, Building2 } from "lucide-react"
 
-const stats = [
-  {
-    title: "Pending Requests",
-    value: "0",
-    icon: Clock,
-  },
-  {
-    title: "Approved This Month",
-    value: "0",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Available Venues",
-    value: "0",
-    icon: MapPin,
-  },
-  {
-    title: "Total Venues",
-    value: "0",
-    icon: MapPin,
-  },
-]
+// 1. Define the props expected
+interface AdminStatsProps {
+  pendingCount: number;
+  approvedCount: number;
+  activeVenuesCount: number;
+  totalVenuesCount: number;
+}
 
-export function AdminStats() {
+// 2. Accept props in the function
+export function AdminStats({ 
+  pendingCount, 
+  approvedCount, 
+  activeVenuesCount, 
+  totalVenuesCount 
+}: AdminStatsProps) {
+  
+  const stats = [
+    {
+      title: "Pending Requests",
+      value: pendingCount, // Use real data
+      icon: Clock,
+    },
+    {
+      title: "Approved This Month",
+      value: approvedCount, // Use real data
+      icon: CheckCircle2,
+    },
+    {
+      title: "Available Venues",
+      value: activeVenuesCount, // Use real data
+      icon: MapPin,
+    },
+    {
+      title: "Total Venues",
+      value: totalVenuesCount, // Use real data
+      icon: Building2,
+    },
+  ]
+
   return (
     <div className="flex flex-col gap-4">
       {stats.map((stat, index) => (

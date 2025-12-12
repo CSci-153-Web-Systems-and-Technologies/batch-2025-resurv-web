@@ -75,12 +75,12 @@ export default async function AdminDashboardPage() {
                 activeVenuesCount={activeVenuesResult.count || 0}
                 totalVenuesCount={totalVenuesResult.count || 0}
             />
-            <RecentRequests />
           </div>
 
           <div className="lg:col-span-2 flex flex-col gap-4">
             <BookingTrendChart />
             <QuickActions />
+            <RecentRequests />
           </div>
 
         </div>
