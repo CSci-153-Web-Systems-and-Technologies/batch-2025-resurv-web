@@ -1,6 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-// Define protected routes
+// 1. Define specific route groups
+const isAdminRoute = createRouteMatcher(['/admin(.*)']);
+const isStudentRoute = createRouteMatcher(['/student(.*)']);
+
+// Keep your existing protected routes if they are separate
 const isProtectedRoute = createRouteMatcher([
   '/authentication/dashboard(.*)',
   '/authentication/eventspaces(.*)',
@@ -8,20 +13,30 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
 
-  // 1. Log what is happening to your terminal
-  console.log(`[Middleware] Checking: ${req.nextUrl.pathname}`);
-  console.log(`[Middleware] User Logged In? ${!!userId}`);
-
-  // 2. Allow Webhooks (CRITICAL)
+  // 1. Webhooks Check (Keep this first!)
   if (req.nextUrl.pathname.startsWith('/api/webhooks')) {
-    return; // Let it pass!
+    return;
   }
 
-  // 3. Protect routes
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+  if ((isAdminRoute(req) || isStudentRoute(req) || isProtectedRoute(req)) && !userId) {
+    return redirectToSignIn();
+  }
+
+  const role = (sessionClaims as any)?.metadata?.role;
+
+  if (isAdminRoute(req) && role !== 'admin') {
+    // If user is NOT admin, kick them out
+    console.log(`[Middleware] Blocked ${role} from Admin Route`);
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  // 5. PROTECT STUDENT ROUTES
+  // (Optional: If admins SHOULD access student views, remove "&& role !== 'admin'")
+  if (isStudentRoute(req) && role !== 'student') {
+    console.log(`[Middleware] Blocked ${role} from Student Route`);
+    return NextResponse.redirect(new URL('/', req.url));
   }
 });
 
