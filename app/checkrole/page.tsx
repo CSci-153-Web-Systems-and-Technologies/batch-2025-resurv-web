@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
+import RoleSync from "@/components/rolesync";
 
 export default async function CheckRole() {
   const user = await currentUser();
@@ -20,5 +21,13 @@ export default async function CheckRole() {
 
 
 
-  return null; 
+  return (
+    <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <h2>Setting up your account...</h2>
+        <p>Please wait while we assign your role.</p>
+        <RoleSync /> 
+      </div>
+    </div>
+  );
 }
