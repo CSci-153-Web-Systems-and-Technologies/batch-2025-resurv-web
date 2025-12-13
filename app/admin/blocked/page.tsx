@@ -33,7 +33,7 @@ export default async function ReservationPage() {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 bg-[#CEDBEE]">
           <div className="flex items-center gap-2 px-4">
-            <Separator orientation="vertical" className="mr-2 h-4" />
+<Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4 px-0.5 rounded bg-white" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
