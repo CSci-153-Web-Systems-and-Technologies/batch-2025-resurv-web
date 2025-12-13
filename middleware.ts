@@ -20,18 +20,12 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
-  // 2. Ensure user is logged in for protected routes
   if ((isAdminRoute(req) || isStudentRoute(req) || isProtectedRoute(req)) && !userId) {
     return redirectToSignIn();
   }
 
-  // 3. GET USER ROLE
-  // This assumes you stored 'role' in publicMetadata in Clerk
-  // You might need to check "sessionClaims?.metadata?.role" or just "sessionClaims?.public_metadata?.role"
-  // dependent on how you set up your custom claims in Clerk Dashboard.
-  const role = sessionClaims?.metadata?.role as string | undefined;
+  const role = (sessionClaims as any)?.metadata?.role;
 
-  // 4. PROTECT ADMIN ROUTES
   if (isAdminRoute(req) && role !== 'admin') {
     // If user is NOT admin, kick them out
     console.log(`[Middleware] Blocked ${role} from Admin Route`);
@@ -40,7 +34,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 5. PROTECT STUDENT ROUTES
   // (Optional: If admins SHOULD access student views, remove "&& role !== 'admin'")
-  if (isStudentRoute(req) && role !== 'student' && role !== 'admin') {
+  if (isStudentRoute(req) && role !== 'student') {
     console.log(`[Middleware] Blocked ${role} from Student Route`);
     return NextResponse.redirect(new URL('/', req.url));
   }
