@@ -267,7 +267,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
     <>
     {/* --- NEW UPDATED MODAL DESIGN --- */}
     <Dialog open={!!viewReservation} onOpenChange={(open) => !open && setViewReservation(null)}>
-      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378]">
+      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378] border border-[#556378]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <FileText className="h-6 w-6" />
@@ -284,8 +284,8 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
             <div className="grid gap-4 py-4">
                 
                 {/* 1. Requestor Card */}
-                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
                         <User className="h-4 w-4" /> Requestor
                     </h3>
                     <div className="pl-6">
@@ -298,8 +298,8 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                 </div>
 
                 {/* 2. Event Details Card */}
-                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase ">
                         <CalendarIcon className="h-4 w-4" /> Event Details
                     </h3>
                     <div className="grid grid-cols-2 gap-4 pl-6">
@@ -323,15 +323,15 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
                 {/* 3. Attendees & Requirements Flex Row */}
                 <div className="flex gap-4">
-                      <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
-                          <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                      <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]">
+                          <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase  mb-1">
                              <Users className="h-4 w-4" /> Attendees
                           </h3>
                           <p className="pl-6 font-medium">{viewReservation.num_attendees || "N/A"}</p>
                       </div>
                       {viewReservation.special_req && (
-                          <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
-                             <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                          <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]">
+                             <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase  mb-1">
                                  <Check className="h-4 w-4" /> Requirements
                              </h3>
                              <p className="pl-6 text-sm">{viewReservation.special_req}</p>
