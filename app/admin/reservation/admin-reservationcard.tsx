@@ -82,7 +82,6 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
     if (!error && data) {
         setPendingReservations(data.filter(r => r.status === 'pending'));
-        // Normalize status check for both 'approved' and 'Approved'
         setApprovedReservations(data.filter(r => r.status.toLowerCase() === 'approved'));
     }
   }, []); 
@@ -136,25 +135,21 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
         const supabaseClient = await getSupabase();
         if (!supabaseClient) return;
 
-        // 1. Perform Delete AND Select the deleted row to verify
         const { data, error } = await supabaseClient
             .from('reservations')
             .delete()
             .eq('id', reservationId)
-            .select(); // <--- Important: Asks database "Did you actually delete it?"
+            .select(); 
 
         if (error) throw error;
 
-        // 2. CHECK: If data is empty, RLS blocked the delete
         if (!data || data.length === 0) {
             alert("Error: Permission denied. You might not be an 'admin' in the database.");
             return;
         }
 
         alert("Reservation cancelled successfully.");
-        setViewReservation(null); // Close modal
-        
-        // 3. REFRESH: Update the list immediately
+        setViewReservation(null); 
         fetchReservations(); 
 
     } catch (error: any) {
@@ -270,71 +265,95 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
 
   return (
     <>
-    {/* --- UNIVERSAL DETAILS MODAL --- */}
+    {/* --- NEW UPDATED MODAL DESIGN --- */}
     <Dialog open={!!viewReservation} onOpenChange={(open) => !open && setViewReservation(null)}>
-      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378] border-[#556378]">
+      <DialogContent className="sm:max-w-[500px] bg-[#EEF4ED] text-[#556378]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <FileText className="h-6 w-6" />
-            {viewReservation?.status === 'pending' ? 'Review Request' : 'Reservation Details'}
+            {viewReservation?.status === 'pending' ? 'Review Reservation' : 'Reservation Details'}
           </DialogTitle>
           <DialogDescription>
              {viewReservation?.status === 'pending' 
-                ? "Review the request below to approve or reject." 
-                : "View details of this approved reservation."}
+                ? "Review the details below before approving or rejecting." 
+                : "Details of this approved event."}
           </DialogDescription>
         </DialogHeader>
 
         {viewReservation && (
             <div className="grid gap-4 py-4">
-                {/* Status Badge in Header */}
-                <div className="flex justify-end">
-                    <Badge className={
-                        viewReservation.status === 'pending' 
-                        ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" 
-                        : "bg-green-100 text-green-800 hover:bg-green-100"
-                    }>
-                        {viewReservation.status.toUpperCase()}
-                    </Badge>
-                </div>
-
-                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
+                
+                {/* 1. Requestor Card */}
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
                         <User className="h-4 w-4" /> Requestor
                     </h3>
                     <div className="pl-6">
                         <p className="font-bold text-lg">{viewReservation.profiles?.full_name || "Unknown User"}</p>
                         <p className="text-sm text-gray-600">{viewReservation.profiles?.email}</p>
+                        {viewReservation.profiles?.student_id && (
+                            <p className="text-sm text-gray-500">ID: {viewReservation.profiles.student_id}</p>
+                        )}
                     </div>
                 </div>
-                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase">
+
+                {/* 2. Event Details Card */}
+                <div className="flex flex-col gap-2 p-3 bg-white rounded-lg border border-[#556378]/20">
+                    <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider">
                         <CalendarIcon className="h-4 w-4" /> Event Details
                     </h3>
-                    <div className="pl-6">
-                        <span className="font-medium text-lg">{new Date(viewReservation.start_time).toLocaleDateString()}</span>
-                        <div className="text-sm text-gray-600">
-                             {new Date(viewReservation.start_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} - 
-                             {new Date(viewReservation.end_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                    <div className="grid grid-cols-2 gap-4 pl-6">
+                        <div>
+                            <span className="text-xs text-gray-400 font-bold block">DATE</span>
+                            <span className="font-medium">{new Date(viewReservation.start_time).toLocaleDateString()}</span>
                         </div>
-                        <div className="mt-2 pt-2 border-t border-gray-100">
-                            <span className="text-xs text-gray-400 font-bold">PURPOSE</span>
-                            <p className="text-sm text-gray-700">{viewReservation.purpose}</p>
+                        <div>
+                            <span className="text-xs text-gray-400 font-bold block">TIME</span>
+                            <span className="font-medium">
+                                {new Date(viewReservation.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                                {new Date(viewReservation.end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
                         </div>
                     </div>
+                    <div className="pl-6 mt-2">
+                         <span className="text-xs text-gray-400 font-bold block">PURPOSE</span>
+                         <p className="text-sm">{viewReservation.purpose}</p>
+                    </div>
+                </div>
+
+                {/* 3. Attendees & Requirements Flex Row */}
+                <div className="flex gap-4">
+                      <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
+                          <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                             <Users className="h-4 w-4" /> Attendees
+                          </h3>
+                          <p className="pl-6 font-medium">{viewReservation.num_attendees || "N/A"}</p>
+                      </div>
+                      {viewReservation.special_req && (
+                          <div className="flex-1 p-3 bg-white rounded-lg border border-[#556378]/20">
+                             <h3 className="font-semibold flex items-center gap-2 text-sm text-gray-500 uppercase tracking-wider mb-1">
+                                 <Check className="h-4 w-4" /> Requirements
+                             </h3>
+                             <p className="pl-6 text-sm">{viewReservation.special_req}</p>
+                          </div>
+                      )}
                 </div>
             </div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-2">
-          {/* Conditional Footer Buttons based on Status */}
+        <DialogFooter className="gap-2 sm:gap-0">
           {viewReservation?.status === 'pending' ? (
             <>
-                <Button variant="outline" className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100" onClick={() => handleReview(viewReservation.id, 'rejected')}>
+                <Button 
+                    variant="outline" 
+                    className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
+                    onClick={() => handleReview(viewReservation.id, 'rejected')}
+                >
                     <X className="h-4 w-4 mr-2" /> Reject
                 </Button>
-                <Button className="bg-green-600 text-white hover:bg-green-700" onClick={() => handleReview(viewReservation.id, 'approved')}>
-                    <Check className="h-4 w-4 mr-2" /> Approve
+                <Button className="bg-green-600 text-white hover:bg-green-700 ml-1" 
+                onClick={() => handleReview(viewReservation.id, 'approved')}>
+                <Check className="h-4 w-4 mr-2" /> Approve
                 </Button>
             </>
           ) : (
@@ -428,7 +447,7 @@ export function ReservationCard({ facilities, userId }: ReservationFormProps) {
                                     {relevantApproved.map((r) => (
                                         <div 
                                             key={r.id} 
-                                            onClick={() => setViewReservation(r)} // CLICK TO OPEN MODAL
+                                            onClick={() => setViewReservation(r)} 
                                             className="text-xs bg-white p-2 rounded border border-green-100 shadow-sm cursor-pointer hover:bg-green-50 transition-colors"
                                         >
                                             <div className="flex justify-between font-bold text-[#556378]">
