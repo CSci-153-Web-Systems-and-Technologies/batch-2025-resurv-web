@@ -33,28 +33,25 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
     return <div>Error: Facility not found</div>;
   }
 
-  // NOTE: We REMOVED the booking fetch here. The card handles it now.
-
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-[#CEDBEE]">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
+          <div className="flex items-center gap-2 px-4">  
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/student/dashboard" className="text-black">Dashboard</BreadcrumbLink>
+                  <BreadcrumbLink href="/student/dashboard" className="font-bold text-[#556378] text-lg">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink  href={`/student/eventspaces/${id}`} className="text-black">{facility.title}</BreadcrumbLink>
+                  <BreadcrumbLink  href={`/student/eventspaces/${id}`} className="font-bold text-[#556378] text-lg">{facility.title}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href={`/student/reservation/${facility.id}`} className="text-black">Reservation</BreadcrumbLink>
+                  <BreadcrumbLink href={`/student/reservation/${facility.id}`} className="font-bold text-[#556378] text-lg">Reservation</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -65,7 +62,6 @@ export default async function ReservationPage({ params }: { params: Promise<{ id
             <ReservationCard 
                 facility={facility} 
                 userId={user.id} 
-                // REMOVED: bookedDates prop
             />
         </div>
 

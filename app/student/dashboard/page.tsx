@@ -35,7 +35,6 @@ export default async function Page() {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-[#CEDBEE]">
           <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
@@ -43,7 +42,7 @@ export default async function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#" className="text-black">
+                  <BreadcrumbLink href="" className="font-bold text-[#556378] text-lg">
                     Dashboard
                   </BreadcrumbLink>
                 </BreadcrumbItem>
