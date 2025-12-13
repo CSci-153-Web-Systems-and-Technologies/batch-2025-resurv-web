@@ -1,33 +1,25 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
-import RoleSync from "@/components/rolesync";
+
 
 export default async function CheckRole() {
   const user = await currentUser();
 
+  // 1. Not logged in? Go to login.
   if (!user) {
-    redirect("/login");
+    redirect("/sign-in"); 
   }
 
-  // 1. If User is Admin, send them to Admin Dashboard
+  // 2. Has Admin Role?
   if (user.publicMetadata?.role === "admin") {
     redirect("/admin/dashboard");
   } 
   
-// 2. Student Redirect
+  // 3. Has Student Role?
   if (user.publicMetadata?.role === "student") {
     redirect("/student/dashboard");
   }
 
-
-
-  return (
-    <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h2>Setting up your account...</h2>
-        <p>Please wait while we assign your role.</p>
-        <RoleSync /> 
-      </div>
-    </div>
-  );
+  // 4. No Role? Render the Healer Component
+  return null;
 }
