@@ -2,23 +2,21 @@ import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 
 export default async function CheckRole() {
-  // 1. Get the currently logged-in user
   const user = await currentUser();
 
-  // 2. If no user (error case), send back to login
   if (!user) {
     redirect("/login");
   }
 
-  // 3. Check the role from Metadata
+  // 1. If User is Admin, send them to Admin Dashboard
   if (user.publicMetadata?.role === "admin") {
     redirect("/admin/dashboard");
   } 
   
-  // 4. Default: Redirect to Student Dashboard
-  // (Make sure this path matches your actual folder structure!)
-  redirect("/authentication/dashboard");
+  // 2. If User is Student (or anyone else), send to Student Dashboard
+  // If this component was protecting an Admin route, this redirect implies access denied.
+  // We add the query param here so the destination knows to show an alert.
+  redirect("/authentication/dashboard?unauthorized=true");
 
-  // 5. This line is crucial to fix the "Not a React Component" error
   return null; 
 }
