@@ -15,10 +15,10 @@ import {
 
 import { supabase } from "@/lib/supabase";
 import { EventspaceCard } from "../eventspaces/eventspacecard";
-import { syncUser } from "@/lib/syncUser";
+import { syncUserRole } from "@/lib/syncUser";
 export default async function Page() {
   
-  await syncUser();
+  await syncUserRole();
   
   const { data: facilities, error } = await supabase
     .from('facilities')
