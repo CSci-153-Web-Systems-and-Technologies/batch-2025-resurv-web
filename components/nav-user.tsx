@@ -1,0 +1,73 @@
+"use client"
+import {
+  ChevronsUpDown,
+  LogOut
+} from "lucide-react"
+
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar"
+import { useClerk, useUser } from "@clerk/nextjs"
+
+export function NavUser() {
+  const { isMobile } = useSidebar()
+  const { signOut } = useClerk()
+  const { user, isLoaded } = useUser()
+
+  if (!isLoaded || !user) return null;
+
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-[#C1E1C1] data-[state=open]:text-[#556378] cursor-pointer hover:bg-[#C1E1C1] hover:text-[#556378] bg-[#556378] text-[#C1E1C1]"
+            >
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={user.imageUrl} alt={user.fullName || ""} />
+                <AvatarFallback className="rounded-lg">
+                    {user.firstName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.fullName}</span>
+                <span className="truncate text-xs">{user.primaryEmailAddress?.emailAddress}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-[#556378] hover:bg-[#C1E1C1]"
+            side={isMobile ? "bottom" : "right"}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuItem
+            onClick={() => signOut({ redirectUrl: '/login' })}
+            className=" focus:bg-[#C1E1C1] focus:text-[#556378] cursor-pointer text-[#C1E1C1] "
+            > 
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  )
+}
