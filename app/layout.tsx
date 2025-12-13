@@ -1,18 +1,16 @@
-import { ClerkProvider } from '@clerk/nextjs'
-import {AuthAlert} from "./checkrole/auth-alert";
-import './globals.css'
+import { AuthAlert } from "./checkrole/auth-alert";
+import { Suspense } from "react"; // 1. Import Suspense
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <AuthAlert />
-        <body>{children}</body>
-      </html>
-    </ClerkProvider>
-  )
+    <html lang="en">
+      <body>
+        <Suspense fallback={null}>
+            <AuthAlert />
+        </Suspense>
+        
+        {children}
+      </body>
+    </html>
+  );
 }
