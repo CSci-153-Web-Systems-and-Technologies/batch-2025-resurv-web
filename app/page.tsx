@@ -31,7 +31,7 @@ export default function LandingPage() {
           <Link href="#roles" className="hover:text-black transition-colors">For Admins</Link>
         </nav>
         <div className="flex gap-3">
-          <Link href="/login">
+          <Link href="/checkrole">
             <Button className="bg-[#556378] hover:bg-[#445166] text-white font-semibold shadow-lg shadow-[#556378]/20 cursor-pointer">
               Sign In
             </Button>
